@@ -23,6 +23,15 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'updated_at',]
 
 
+class ApartmentBookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ApartmentBooking
+        fields = ['apartment_id',
+                  'user_id',
+                  'start_date',
+                  'end_date']
+
+
 class ResponseSerializer(serializers.Serializer):
     status = serializers.BooleanField(default=True)
     message = serializers.CharField(default='Data retrieved successfully')
@@ -38,6 +47,16 @@ class ApartmentInsectionSerializer(serializers.ModelSerializer):
                   'isInspected',
                   'created_at',
                   'updated_at',]
+
+
+class BookApartmentInsectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ApartmentInspection
+        fields = ['apartment_id',
+                  'user_id',
+                  'inspection_date',
+                  ]
+
 
 class ApartmentInsectionResponseSerializer(serializers.Serializer):
     status = serializers.BooleanField(default=True)

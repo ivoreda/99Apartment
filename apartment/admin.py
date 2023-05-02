@@ -9,6 +9,8 @@ admin.site.register(models.ApartmentImages)
 admin.site.register(models.ApartmentReviews)
 admin.site.register(models.UserData)
 admin.site.register(models.ApartmentInspection)
+admin.site.register(models.ApartmentBooking)
+
 
 
 

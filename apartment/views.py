@@ -2,6 +2,7 @@ from rest_framework import generics
 from drf_spectacular.utils import extend_schema
 
 from rest_framework.response import Response
+from rest_framework import status
 from apartment import models, serializers
 
 import json
@@ -19,9 +20,28 @@ class UnlistApartmentView(generics.UpdateAPIView):
 
 class BookApartmentView(generics.CreateAPIView):
     """View for user to book apartment"""
-    serializer_class = serializers.ApartmentSerializer
+    serializer_class = serializers.ApartmentBookingSerializer
 
     def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid():
+            try:
+                apartment = models.Apartment.objects.get(id=serializer.data['apartment_id'])
+                if apartment.isOccupied:
+                    return Response({"error": False, "message":"This apartment is full"})
+                booking = models.ApartmentBooking.objects.create(
+                    apartment_id = apartment,
+                    user_id = request.data['user_id'],
+                    start_date = request.data['start_date'],
+                    end_date = request.data['end_date']
+                )
+                return Response({"message":"Apartment booked successfully"}, status=status.HTTP_201_CREATED)
+            except Exception:
+                return Response({"error": True, "message":"server error"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 
 @extend_schema(methods=['PATCH'], exclude=True)
@@ -53,24 +73,19 @@ class ApartmentDetailView(generics.RetrieveAPIView):
 
 class BookApartmentInspectionView(generics.CreateAPIView):
     """View for booking apartment inspection"""
-    serializer_class = serializers.ApartmentInsectionSerializer
+    serializer_class = serializers.BookApartmentInsectionSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
-            try:
-                apartment = models.Apartment.objects.get(id=serializer.data['apartment_id'])
-                inspection = models.ApartmentInspection.objects.create(
-                    apartment_id = apartment,
-                    user_id = request.data['user_id'],
-                    inspection_date = request.data['inspection_date'],
-                )
-            except Exception:
-                return Response({'status':False,
-                        'message':'Server error'})
-            list_inspection = json.dumps(inspection)
-            return Response({"message":"success", "data":list_inspection})
+            apartment = models.Apartment.objects.get(id=serializer.data['apartment_id'])
+            inspection = models.ApartmentInspection.objects.create(
+                apartment_id = apartment,
+                user_id = request.data['user_id'],
+                inspection_date = request.data['inspection_date'],
+            )
+            return Response({"message":"success"})
 
 class GetApartmentInspectionView(generics.ListAPIView):
     """View for listing all apartment inspections"""

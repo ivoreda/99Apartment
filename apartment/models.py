@@ -19,6 +19,8 @@ class Apartment(models.Model):
     apartment_fees = models.JSONField(blank=True, null=True)
     amenities = models.JSONField(blank=True, null=True)
 
+    total_price = models.FloatField(default=0)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -52,9 +54,11 @@ class ApartmentImages(models.Model):
 
 class ApartmentBooking(models.Model):
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
+    isPaidFor = models.BooleanField(default=False)
     user_id = models.CharField(max_length=10)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
+
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
