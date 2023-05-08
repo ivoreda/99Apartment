@@ -14,12 +14,12 @@ class Apartment(models.Model):
     number_of_occupants = models.IntegerField(default=0)
     hasOccupants = models.BooleanField(default=False)
     isOccupied = models.BooleanField(default=False)
-    price = models.FloatField(default=0)
+    price = models.IntegerField(default=0)
 
     apartment_fees = models.JSONField(blank=True, null=True)
     amenities = models.JSONField(blank=True, null=True)
 
-    total_price = models.FloatField(default=0)
+    total_price = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -58,7 +58,7 @@ class ApartmentBooking(models.Model):
     user_id = models.CharField(max_length=10)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-
+    payment_reference = models.CharField(max_length=255)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -79,7 +79,7 @@ class ApartmentReviews(models.Model):
 class ApartmentInspection(models.Model):
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=10)
-    inspection_date = models.DateTimeField(auto_now_add=True)
+    inspection_date = models.DateTimeField()
     isInspected = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)

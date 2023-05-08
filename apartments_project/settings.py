@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # 3rd party
     "drf_spectacular",
     "rest_framework",
+    "corsheaders",
 
     # Local
     "apartment",
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -81,13 +83,23 @@ WSGI_APPLICATION = "apartments_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME':'railway',
+        'USER':'postgres',
+        'PASSWORD': 'bfKT6enzrqHFu3a8o16g',
+        'HOST': 'containers-us-west-108.railway.app',
+        'PORT': 5647,
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -133,6 +145,9 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 
 REST_FRAMEWORK = {

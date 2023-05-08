@@ -1,9 +1,13 @@
 asgiref==3.6.0
 attrs==23.1.0
+certifi==2022.12.7
+charset-normalizer==3.1.0
 Django==4.2
+django-cors-headers==3.14.0
 djangorestframework==3.14.0
 drf-spectacular==0.26.2
 gunicorn==20.1.0
+idna==3.4
 inflection==0.5.1
 jsonschema==4.17.3
 psycopg2==2.9.6
@@ -11,5 +15,7 @@ pyrsistent==0.19.3
 python-dotenv==1.0.0
 pytz==2023.3
 PyYAML==6.0
+requests==2.30.0
 sqlparse==0.4.3
 uritemplate==4.1.1
+urllib3==2.0.2
