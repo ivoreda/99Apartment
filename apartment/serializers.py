@@ -19,6 +19,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'price',
                   'apartment_fees',
                   'amenities',
+                  'total_price',
                   'created_at',
                   'updated_at',]
 
