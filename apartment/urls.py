@@ -3,9 +3,9 @@ from . import views
 
 urlpatterns = [
     # Not for users
-    # path('list-apartment/', views.ListApartmentView.as_view(), name='list-apartment'),
-    # path('unlist-apartment/', views.UnlistApartmentView.as_view(), name='unlist-apartment'),
-    # path('edit-apartment/', views.EditApartmentView.as_view(), name='edit-apartment'),
+    path('list-apartment/', views.ListApartmentView.as_view(), name='list-apartment'),
+    path('unlist-apartment/', views.UnlistApartmentView.as_view(), name='unlist-apartment'),
+    path('edit-apartment/', views.EditApartmentView.as_view(), name='edit-apartment'),
 
     # For users
     path('book-apartment/', views.BookApartmentView.as_view(), name='book-apartment'),
