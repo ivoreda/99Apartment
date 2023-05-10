@@ -1,4 +1,5 @@
 from django.db import models
+from cloudinary.models import CloudinaryField
 
 # Create your models here.
 
@@ -15,6 +16,17 @@ class Apartment(models.Model):
     hasOccupants = models.BooleanField(default=False)
     isOccupied = models.BooleanField(default=False)
     price = models.IntegerField(default=0)
+
+    image1 =  CloudinaryField('image 1',null=True, default=None, blank=True)
+    image2 =  CloudinaryField('image 2',null=True, default=None, blank=True)
+    image3 =  CloudinaryField('image 3',null=True, default=None, blank=True)
+    image4 =  CloudinaryField('image 4',null=True, default=None, blank=True)
+    image5 =  CloudinaryField('image 5',null=True, default=None, blank=True)
+    image6 =  CloudinaryField('image 6',null=True, default=None, blank=True)
+    image7 =  CloudinaryField('image 7',null=True, default=None, blank=True)
+    image8 =  CloudinaryField('image 8',null=True, default=None, blank=True)
+    image9 =  CloudinaryField('image 9',null=True, default=None, blank=True)
+    image10 =  CloudinaryField('image 10',null=True, default=None, blank=True)
 
     apartment_fees = models.JSONField(blank=True, null=True)
     amenities = models.JSONField(blank=True, null=True)
@@ -34,22 +46,22 @@ class ApartmentImages(models.Model):
     and the links are saved
     """
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
-    image1 = models.TextField()
-    image2 = models.TextField()
-    image3 = models.TextField()
-    image4 = models.TextField()
-    image5 = models.TextField()
-    image6 = models.TextField()
-    image7 = models.TextField()
-    image8 = models.TextField()
-    image9 = models.TextField()
-    image10 = models.TextField()
+    image1 =  CloudinaryField('image 1',null=True, default=None, blank=True)
+    image2 =  CloudinaryField('image 2',null=True, default=None, blank=True)
+    image3 =  CloudinaryField('image 3',null=True, default=None, blank=True)
+    image4 =  CloudinaryField('image 4',null=True, default=None, blank=True)
+    image5 =  CloudinaryField('image 5',null=True, default=None, blank=True)
+    image6 =  CloudinaryField('image 6',null=True, default=None, blank=True)
+    image7 =  CloudinaryField('image 7',null=True, default=None, blank=True)
+    image8 =  CloudinaryField('image 8',null=True, default=None, blank=True)
+    image9 =  CloudinaryField('image 9',null=True, default=None, blank=True)
+    image10 =  CloudinaryField('image 10',null=True, default=None, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return self.apartment_id
+        return str(self.apartment_id)
 
 
 class ApartmentBooking(models.Model):

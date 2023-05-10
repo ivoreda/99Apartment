@@ -70,9 +70,38 @@ class BookApartmentView(generics.CreateAPIView):
 
 
 @extend_schema(methods=['PATCH'], exclude=True)
-class EditApartmentView(generics.UpdateAPIView):
+class AddImagesToApartmentView(generics.UpdateAPIView):
     """View for editing apartment listing"""
-    pass
+    serializer_class = serializers.ApartmentImageSerializer
+
+    def patch(self, request, *args, **kwargs):
+        pass
+
+        # hobbies = request.data['hobbies']
+        # token = request.headers.get('Authorization')
+        # try:
+        #     payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        # except jwt.ExpiredSignatureError:
+        #     raise AuthenticationFailed('unauthenticated')
+        # user_id = payload['id']
+        # user = models.CustomUser.objects.filter(id=user_id).first()
+        # if user is None:
+        #     return Response({'status': False, 'message':'user not found'})
+        # print("hobbies",user.hobbies)
+        # user.hobbies.update(hobbies)
+        # user.save()
+        # serializer = serializers.UserSerializer(user)
+        # return Response({"status":True, "message":"user hobbies updated successfully","data":serializer.data})
+
+
+        """
+            upload images to cloudinary
+            save the links to the images on the db
+            need an API that takes in the images
+            sends images to cloudinary
+            saves the link
+        """
+
 
 
 class PaginatedListApartmentView(generics.ListAPIView):
@@ -81,19 +110,24 @@ class PaginatedListApartmentView(generics.ListAPIView):
     queryset = models.Apartment.objects.filter(isOccupied=False)
 
     def get(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = serializers.ResponseSerializer({"data": queryset})
-        return Response(serializer.data)
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = serializers.ResponseSerializer({"data": queryset})
+            return Response(serializer.data)
+        except Exception:
+            return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
 
 class ApartmentDetailView(generics.RetrieveAPIView):
     """View for getting the details of one apartment"""
     serializer_class = serializers.ApartmentSerializer
 
     def get(self, request, *args, **kwargs):
-        queryset = models.Apartment.objects.filter(id=self.kwargs.get('id'))
-        serializer = serializers.ResponseSerializer({"data": queryset})
-
-        return Response(serializer.data)
+        try:
+            queryset = models.Apartment.objects.filter(id=self.kwargs.get('id'))
+            serializer = serializers.ResponseSerializer({"data": queryset})
+            return Response(serializer.data)
+        except Exception:
+            return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BookApartmentInspectionView(generics.CreateAPIView):

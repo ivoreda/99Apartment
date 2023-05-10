@@ -2,6 +2,23 @@ from rest_framework import serializers
 from . import models
 
 
+class ApartmentImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ApartmentImages
+        fields = ['apartment_id',
+                  'image1',
+                  'image2',
+                  'image3',
+                  'image4',
+                  'image5',
+                  'image6',
+                  'image7',
+                  'image8',
+                  'image9',
+                  'image10',
+                  ]
+
+
 class ApartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
@@ -19,6 +36,16 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'price',
                   'apartment_fees',
                   'amenities',
+                  'image1',
+                  'image2',
+                  'image3',
+                  'image4',
+                  'image5',
+                  'image6',
+                  'image7',
+                  'image8',
+                  'image9',
+                  'image10',
                   'total_price',
                   'created_at',
                   'updated_at',]
