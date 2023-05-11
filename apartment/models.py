@@ -13,6 +13,7 @@ class Apartment(models.Model):
     state = models.CharField(max_length=20,help_text="State")
     country = models.CharField(max_length=50,help_text="Country")
     number_of_occupants = models.IntegerField(default=0)
+    number_of_rooms = models.IntegerField(default=0)
     hasOccupants = models.BooleanField(default=False)
     isOccupied = models.BooleanField(default=False)
     price = models.IntegerField(default=0)
@@ -39,6 +40,13 @@ class Apartment(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.number_of_rooms == self.number_of_occupants:
+            self.isOccupied = True
+        else:
+            self.isOccupied = False
+        super(Apartment, self).save(*args, **kwargs)
 
 class ApartmentImages(models.Model):
     """

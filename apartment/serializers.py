@@ -31,6 +31,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'state',
                   'country',
                   'number_of_occupants',
+                  'number_of_rooms',
                   'hasOccupants',
                   'isOccupied',
                   'price',

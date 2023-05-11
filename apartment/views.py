@@ -35,9 +35,6 @@ class BookApartmentView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
             try:
-                apartment = models.Apartment.objects.get(id=serializer.data['apartment_id'])
-                if apartment.isOccupied:
-                    return Response({"error": False, "message":"This apartment is full"})
 
                 # get user
                 token = request.headers.get('Authorization')
@@ -45,10 +42,11 @@ class BookApartmentView(generics.CreateAPIView):
                 user_id = user['data']['id']
                 user_email = user['data']['email']
                 price = apartment.price
-                # get user email
-                # get apartment price by id from the apartment model
-                # send the amount and the user email to paystack endpoint
-                # save reference and add authorization url to response
+
+                apartment = models.Apartment.objects.get(id=serializer.data['apartment_id'])
+                if apartment.isOccupied:
+                    return Response({"error": False, "message":"This apartment is full"})
+                
                 paystack_response = paystack_api.initialise_transaction(email=user_email, amount=price)
                 print("paystack response", paystack_response)
                 authorization_url = paystack_response['data']['authorization_url']
@@ -61,6 +59,9 @@ class BookApartmentView(generics.CreateAPIView):
                     end_date = request.data['end_date'],
                     payment_reference = reference
                 )
+                apartment.number_of_occupants+=1
+
+
                 return Response({"message":"Apartment booked successfully", "data": {"authorization_url":authorization_url}}, status=status.HTTP_201_CREATED)
             except Exception:
                 return Response({"error": True, "message":"server error"}, status=status.HTTP_400_BAD_REQUEST)
