@@ -14,6 +14,9 @@ urlpatterns = [
     path('', views.PaginatedListApartmentView.as_view(), name='all-apartment'),
     path('apartment-inpection/', views.GetApartmentInspectionView.as_view(), name='apartment-inpection'),
 
+    path('review-apartment', views.ReviewApartmentView.as_view(), name='review-apartment'),
+    path('apartment-reviews/<int:id>', views.ApartmentReviewsListView.as_view(), name='apartment-reviews'),
+
 
 
 ]
