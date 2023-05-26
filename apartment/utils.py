@@ -1,7 +1,9 @@
 import requests
 import json
 
-baseUrl = "https://user-service-production-7c6d.up.railway.app"
+# baseUrl = "https://user-service-production-7c6d.up.railway.app"
+
+baseUrl = "http://127.0.0.1:8001"
 
 class UserService:
 
@@ -12,7 +14,7 @@ class UserService:
         token = kwargs.get('token')
 
         headers = {
-        'Authorization': '{token}'.format(token=token),
+        'Authorization': 'Bearer {token}'.format(token=token),
         'Accept': 'application/json'
         }
 
@@ -50,9 +52,8 @@ class PaystackAPI:
         return json.loads(response.content.decode('utf-8'))
 
     def verify_transaction(self, **kwargs):
-        url = f'{self.paystackUrl}/transaction/verify/{reference}'
-
         reference = kwargs.get('reference')
+        url = f'{self.paystackUrl}/transaction/verify/{reference}'
 
         payload = {}
 

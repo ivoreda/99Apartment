@@ -66,6 +66,12 @@ class ApartmentBookingSerializer(serializers.ModelSerializer):
                   'end_date']
 
 
+class VerifyApartmentBookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ApartmentBooking
+        fields = ['payment_reference']
+
+
 class ResponseSerializer(serializers.Serializer):
     status = serializers.BooleanField(default=True)
     message = serializers.CharField(default='Data retrieved successfully')
@@ -110,3 +116,10 @@ class GetApartmentReviewsSerializer(serializers.ModelSerializer):
         model = models.ApartmentReview
         fields = ['id', 'apartment_id', 'user_id',
                   'review', 'rating', 'created_at',]
+
+
+class ApartmentLocationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Apartment
+        fields = ['city']

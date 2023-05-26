@@ -9,10 +9,14 @@ urlpatterns = [
 
     # For users
     path('book-apartment/', views.BookApartmentView.as_view(), name='book-apartment'),
+    path('verify-apartment-booking/', views.VerifyApartmentBooking.as_view(), name='verify-apartment-booking'),
+
     path('book-apartment-inpection/', views.BookApartmentInspectionView.as_view(), name='book-apartment-inpection'),
     path('<int:id>/', views.ApartmentDetailView.as_view(), name='apartment-detail'),
     path('', views.PaginatedListApartmentView.as_view(), name='all-apartment'),
     path('apartment-inpection/', views.GetApartmentInspectionView.as_view(), name='apartment-inpection'),
+
+    path('apartment-locations', views.ApartmentLocationView.as_view(), name='apartment-location'),
 
     path('review-apartment', views.ReviewApartmentView.as_view(), name='review-apartment'),
     path('apartment-reviews/<int:id>', views.ApartmentReviewsListView.as_view(), name='apartment-reviews'),

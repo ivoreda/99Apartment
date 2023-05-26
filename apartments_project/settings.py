@@ -95,6 +95,18 @@ WSGI_APPLICATION = "apartments_project.wsgi.application"
 #     }
 # }
 
+# Local postgres
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME':'99apartment_local',
+#         'USER':'postgres',
+#         'PASSWORD': 'postgres',
+#         'HOST': 'localhost',
+#         'PORT': 5432,
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

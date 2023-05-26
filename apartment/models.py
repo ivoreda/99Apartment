@@ -39,7 +39,7 @@ class Apartment(models.Model):
     amenities = models.JSONField(default=dict, blank=True, null=True)
     rules = models.JSONField(default=dict, blank=True, null=True)
     map_url = models.TextField(default= "map url", blank=True, null=True)
-    apartment_type = models.CharField(choices=APARTMENT_TYPE, default='Shared Housing', blank=True, null=True)
+    apartment_type = models.CharField(choices=APARTMENT_TYPE, default='Shared Housing', blank=True, null=True, max_length=255)
     tax = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     number_of_reviews = models.IntegerField(default=0)
@@ -57,6 +57,10 @@ class Apartment(models.Model):
             self.isOccupied = True
         else:
             self.isOccupied = False
+        if self.number_of_occupants >= 1:
+            self.hasOccupants = True
+        else:
+            self.hasOccupants = False
         super(Apartment, self).save(*args, **kwargs)
 
 
