@@ -1,14 +1,14 @@
 import requests
 import json
 
-# baseUrl = "https://user-service-production-7c6d.up.railway.app"
+baseUrl = "https://user-service-production-7c6d.up.railway.app"
 
-baseUrl = "http://127.0.0.1:8001"
+# baseUrl = "http://127.0.0.1:8001"
 
 class UserService:
 
     def get_user(self, **kwargs):
-        url = f'{baseUrl}/user/get-user'
+        url = f'{baseUrl}/user/get-user/'
 
         payload = {}
         token = kwargs.get('token')

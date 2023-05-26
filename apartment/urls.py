@@ -9,17 +9,25 @@ urlpatterns = [
 
     # For users
     path('book-apartment/', views.BookApartmentView.as_view(), name='book-apartment'),
-    path('verify-apartment-booking/', views.VerifyApartmentBooking.as_view(), name='verify-apartment-booking'),
+    path('verify-apartment-booking/', views.VerifyApartmentBooking.as_view(),
+         name='verify-apartment-booking'),
 
-    path('book-apartment-inpection/', views.BookApartmentInspectionView.as_view(), name='book-apartment-inpection'),
+    path('book-apartment-inpection/', views.BookApartmentInspectionView.as_view(),
+         name='book-apartment-inpection'),
     path('<int:id>/', views.ApartmentDetailView.as_view(), name='apartment-detail'),
     path('', views.PaginatedListApartmentView.as_view(), name='all-apartment'),
-    path('apartment-inpection/', views.GetApartmentInspectionView.as_view(), name='apartment-inpection'),
+    path('search-for-apartments/<str:city>/<int:no_of_rooms>', views.SearchApartmentView.as_view(), name='search-for-apartment'),
 
-    path('apartment-locations', views.ApartmentLocationView.as_view(), name='apartment-location'),
+    path('apartment-inpection/', views.GetApartmentInspectionView.as_view(),
+         name='apartment-inpection'),
 
-    path('review-apartment', views.ReviewApartmentView.as_view(), name='review-apartment'),
-    path('apartment-reviews/<int:id>', views.ApartmentReviewsListView.as_view(), name='apartment-reviews'),
+    path('apartment-cities/', views.GetApartmentCitiesView.as_view(),
+         name='apartment-cities'),
+
+    path('review-apartment/', views.ReviewApartmentView.as_view(),
+         name='review-apartment'),
+    path('apartment-reviews/<int:id>/',
+         views.ApartmentReviewsListView.as_view(), name='apartment-reviews'),
 
 
 

@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "cloudinary",
+    "django_filters",
 
     # Local
     "apartment",

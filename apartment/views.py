@@ -1,5 +1,8 @@
 from rest_framework import generics
 from rest_framework.views import APIView
+
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 
 from rest_framework.response import Response
@@ -47,7 +50,6 @@ class BookApartmentView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
             token = request.headers.get('Authorization')
-            print(token)
             if token is None:
                 return Response({"error": True, "message": "unauthenticated"})
             user = user_service.get_user(token=token)
@@ -60,7 +62,6 @@ class BookApartmentView(generics.CreateAPIView):
 
             paystack_response = paystack_api.initialise_transaction(
                 email=user_email, amount=apartment.total_price)
-            print("paystack response", paystack_response)
             authorization_url = paystack_response['data']['authorization_url']
             reference = paystack_response['data']['reference']
 
@@ -71,7 +72,6 @@ class BookApartmentView(generics.CreateAPIView):
                 end_date=request.data['end_date'],
                 payment_reference=reference
             )
-
 
             # send email to user after apartment has been booked
 
@@ -91,19 +91,16 @@ class BookApartmentView(generics.CreateAPIView):
         #     return Response({"error": True, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class VerifyApartmentBooking(APIView):
     """View for verifying apartment booking payment"""
     serializer_class = serializers.VerifyApartmentBookingSerializer
     authentication_classes = [TokenAuthentication]
-
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
             token = request.headers.get('Authorization')
-            print(token)
             if token is None:
                 return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
             try:
@@ -114,26 +111,25 @@ class VerifyApartmentBooking(APIView):
 
             payment_reference = serializer.data.get('payment_reference')
 
-            paystack_payment_verification_status = paystack_api.verify_transaction(reference=payment_reference)
-            print("paystack verification", paystack_payment_verification_status)
+            paystack_payment_verification_status = paystack_api.verify_transaction(
+                reference=payment_reference)
             if paystack_payment_verification_status['data']['status'] == True:
-                apartment_booking = models.ApartmentBooking.objects.filter(payment_reference=payment_reference).first()
+                apartment_booking = models.ApartmentBooking.objects.filter(
+                    payment_reference=payment_reference).first()
                 apartment_id = apartment_booking.apartment_id
                 apartment_booking.isPaidFor = True
                 apartment_booking.save()
-                apartment = models.Apartment.objects.filter(id=apartment_id).first()
+                apartment = models.Apartment.objects.filter(
+                    id=apartment_id).first()
                 apartment.number_of_occupants += 1
                 apartment.save()
-                trnx_details = models.Transaction.objects.filter(payment_reference=payment_reference).first()
+                trnx_details = models.Transaction.objects.filter(
+                    payment_reference=payment_reference).first()
                 trnx_details.transaction_status = "success"
                 trnx_details.save()
                 return Response({"status": True, "message": "Payment verified successfully"})
             else:
                 return Response({"status": False, "message": "Payment not verified"})
-
-
-
-
 
 
 @extend_schema(methods=['PATCH'], exclude=True)
@@ -167,6 +163,21 @@ class AddImagesToApartmentView(generics.UpdateAPIView):
             sends images to cloudinary
             saves the link
         """
+
+
+class SearchApartmentView(generics.ListAPIView):
+    """View for searching for apartments"""
+    serializer_class = serializers.ApartmentSerializer
+    queryset = models.Apartment.objects.filter(isOccupied=False)
+
+    def get(self, request, *args, **kwargs):
+        city = self.kwargs.get('city')
+        no_of_rooms = self.kwargs.get('no_of_rooms')
+        items = models.Apartment.objects.filter(
+            city=city, number_of_rooms=no_of_rooms)
+        serializer = serializers.ResponseSerializer({"data": items})
+        return Response(serializer.data)
+
 
 
 class PaginatedListApartmentView(generics.ListAPIView):
@@ -264,10 +275,8 @@ class ApartmentReviewsListView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             apartment_id = self.kwargs.get('id')
-            print(apartment_id)
             reviews = models.ApartmentReview.objects.filter(
                 apartment_id_id=apartment_id)
-            print("reviews", reviews)
             reviewed_apartment = models.Apartment.objects.filter(
                 id=apartment_id).first()
             number_of_reviews = reviewed_apartment.number_of_reviews
@@ -289,16 +298,12 @@ class ReviewApartmentView(generics.CreateAPIView):
         if serializer.is_valid():
             try:
                 token = request.headers.get('Authorization')
-                print("token", token)
                 if token is None:
                     raise AuthenticationFailed("unauthenticated")
                 user = user_service.get_user(token=token)
-                print("user", user)
                 user_id = user['data']['id']
-                print("user id: ", user_id)
                 review = serializer.data.get('review')
                 rating = serializer.data.get('rating')
-                print("rating",rating)
                 if float(rating) > 5:
                     return Response({"status": False, "message": "you cannot give a rating of more than 5"})
                 apartment_id = serializer.data.get('apartment_id')
@@ -306,9 +311,9 @@ class ReviewApartmentView(generics.CreateAPIView):
                     id=apartment_id).first()
 
                 review = models.ApartmentReview.objects.create(apartment_id=apartment,
-                                                                user_id=user_id,
-                                                                review=review,
-                                                                rating=rating)
+                                                               user_id=user_id,
+                                                               review=review,
+                                                               rating=rating)
                 number_of_reviews = models.ApartmentReview.objects.count()
                 apartment.number_of_reviews = number_of_reviews
                 rating_list = []
@@ -323,25 +328,13 @@ class ReviewApartmentView(generics.CreateAPIView):
                 return Response({"status": False, "message": "Server Error"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ApartmentLocationView(generics.ListAPIView):
+class GetApartmentCitiesView(generics.ListAPIView):
     """View for getting an apartments locations"""
-    serializer_class = serializers.ApartmentLocationSerializer
-    # queryset = models.ApartmentReview.objects.all()
+    serializer_class = serializers.ApartmentCitiesSerializer
 
     def get(self, request, *args, **kwargs):
-        try:
-            apartment_location = models.Apartment.objects.all()
-
-            # apartment_id = self.kwargs.get('id')
-            # print(apartment_id)
-            # reviews = models.ApartmentReview.objects.filter(
-            #     apartment_id_id=apartment_id)
-            # print("reviews", reviews)
-            # reviewed_apartment = models.Apartment.objects.filter(
-            #     id=apartment_id).first()
-            # number_of_reviews = reviewed_apartment.number_of_reviews
-
-            # serializer = self.serializer_class(reviews, many=True)
-            return Response({"status": True, "message": "Data retrieved successfully", "data": apartment_location})
-        except Exception:
-            return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+        apartment_cities = models.Apartment.objects.all().values()
+        cities = []
+        for i in apartment_cities:
+            cities.append(i['city'])
+        return Response({"status": True, "message": "Data retrieved successfully", "data": {"number_of_cities": len(cities), "cities": cities}})

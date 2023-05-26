@@ -118,7 +118,7 @@ class GetApartmentReviewsSerializer(serializers.ModelSerializer):
                   'review', 'rating', 'created_at',]
 
 
-class ApartmentLocationSerializer(serializers.ModelSerializer):
+class ApartmentCitiesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Apartment
