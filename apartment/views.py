@@ -172,12 +172,18 @@ class SearchApartmentView(generics.ListAPIView):
     queryset = models.Apartment.objects.filter(isOccupied=False)
 
     def get(self, request, *args, **kwargs):
-        city = self.kwargs.get('city')
-        no_of_rooms = self.kwargs.get('no_of_rooms')
-        items = models.Apartment.objects.filter(
-            city=city, number_of_rooms=no_of_rooms)
-        serializer = serializers.ResponseSerializer({"data": items})
-        return Response(serializer.data)
+        city = request.query_params.get('city', None)
+        no_of_rooms = request.query_params.get('no_of_rooms', None)
+        try:
+            if city:
+                items = models.Apartment.objects.filter(city=city)
+            if no_of_rooms:
+                items = models.Apartment.objects.filter(
+                    number_of_rooms=no_of_rooms)
+            serializer = serializers.ResponseSerializer({"data": items})
+            return Response(serializer.data)
+        except Exception:
+            return Response({"status": False, "message":"server error"})
 
 
 

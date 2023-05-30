@@ -16,7 +16,7 @@ urlpatterns = [
          name='book-apartment-inpection'),
     path('<int:id>/', views.ApartmentDetailView.as_view(), name='apartment-detail'),
     path('', views.PaginatedListApartmentView.as_view(), name='all-apartment'),
-    path('search-for-apartments/<str:city>/<int:no_of_rooms>', views.SearchApartmentView.as_view(), name='search-for-apartment'),
+    path('search-for-apartments/', views.SearchApartmentView.as_view(), name='search-for-apartment'),
 
     path('apartment-inpection/', views.GetApartmentInspectionView.as_view(),
          name='apartment-inpection'),
