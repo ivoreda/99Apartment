@@ -5,7 +5,7 @@ from . import models
 
 
 # admin.site.register(models.Apartment)
-admin.site.register(models.ApartmentImages)
+admin.site.register(models.ApartmentImage)
 admin.site.register(models.ApartmentReview)
 admin.site.register(models.UserData)
 admin.site.register(models.ApartmentInspection)

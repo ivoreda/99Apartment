@@ -4,22 +4,13 @@ from . import models
 
 class ApartmentImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.ApartmentImages
-        fields = ['apartment_id',
-                  'image1',
-                  'image2',
-                  'image3',
-                  'image4',
-                  'image5',
-                  'image6',
-                  'image7',
-                  'image8',
-                  'image9',
-                  'image10',
-                  ]
+        model = models.ApartmentImage
+        fields = ['apartment_id','image',]
 
 
 class ApartmentSerializer(serializers.ModelSerializer):
+    image = ApartmentImageSerializer(many=True, read_only=True)
+
     class Meta:
         model = models.Apartment
         fields = ['id',
@@ -43,16 +34,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'tax',
                   'rating',
                   'number_of_reviews',
-                  'image1',
-                  'image2',
-                  'image3',
-                  'image4',
-                  'image5',
-                  'image6',
-                  'image7',
-                  'image8',
-                  'image9',
-                  'image10',
+                  'image',
                   'total_price',
                   'created_at',
                   'updated_at',]

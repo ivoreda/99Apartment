@@ -113,6 +113,7 @@ class VerifyApartmentBooking(APIView):
 
             paystack_payment_verification_status = paystack_api.verify_transaction(
                 reference=payment_reference)
+            print("payment verification", paystack_payment_verification_status)
             if paystack_payment_verification_status['data']['status'] == True:
                 apartment_booking = models.ApartmentBooking.objects.filter(
                     payment_reference=payment_reference).first()

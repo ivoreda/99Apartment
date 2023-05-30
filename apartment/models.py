@@ -24,20 +24,20 @@ class Apartment(models.Model):
     isOccupied = models.BooleanField(default=False)
     price = models.IntegerField(default=0)
 
-    image1 = CloudinaryField('image 1', null=True, default=None, blank=True)
-    image2 = CloudinaryField('image 2', null=True, default=None, blank=True)
-    image3 = CloudinaryField('image 3', null=True, default=None, blank=True)
-    image4 = CloudinaryField('image 4', null=True, default=None, blank=True)
-    image5 = CloudinaryField('image 5', null=True, default=None, blank=True)
-    image6 = CloudinaryField('image 6', null=True, default=None, blank=True)
-    image7 = CloudinaryField('image 7', null=True, default=None, blank=True)
-    image8 = CloudinaryField('image 8', null=True, default=None, blank=True)
-    image9 = CloudinaryField('image 9', null=True, default=None, blank=True)
-    image10 = CloudinaryField('image 10', null=True, default=None, blank=True)
+    # image1 = CloudinaryField('image 1', null=True, default=None, blank=True)
+    # image2 = CloudinaryField('image 2', null=True, default=None, blank=True)
+    # image3 = CloudinaryField('image 3', null=True, default=None, blank=True)
+    # image4 = CloudinaryField('image 4', null=True, default=None, blank=True)
+    # image5 = CloudinaryField('image 5', null=True, default=None, blank=True)
+    # image6 = CloudinaryField('image 6', null=True, default=None, blank=True)
+    # image7 = CloudinaryField('image 7', null=True, default=None, blank=True)
+    # image8 = CloudinaryField('image 8', null=True, default=None, blank=True)
+    # image9 = CloudinaryField('image 9', null=True, default=None, blank=True)
+    # image10 = CloudinaryField('image 10', null=True, default=None, blank=True)
 
     apartment_fees = models.JSONField(default=dict, blank=True, null=True)
-    amenities = models.JSONField(default=dict, blank=True, null=True)
-    rules = models.JSONField(default=dict, blank=True, null=True)
+    amenities = models.JSONField(default={"amenities": []}, blank=True, null=True)
+    rules = models.JSONField(default={"rules": []}, blank=True, null=True)
     map_url = models.TextField(default= "map url", blank=True, null=True)
     apartment_type = models.CharField(choices=APARTMENT_TYPE, default='Shared Housing', blank=True, null=True, max_length=255)
     tax = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
@@ -64,22 +64,13 @@ class Apartment(models.Model):
         super(Apartment, self).save(*args, **kwargs)
 
 
-class ApartmentImages(models.Model):
+class ApartmentImage(models.Model):
     """
     images are uploaded to cloudinary or S3
     and the links are saved
     """
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
-    image1 = CloudinaryField('image 1', null=True, default=None, blank=True)
-    image2 = CloudinaryField('image 2', null=True, default=None, blank=True)
-    image3 = CloudinaryField('image 3', null=True, default=None, blank=True)
-    image4 = CloudinaryField('image 4', null=True, default=None, blank=True)
-    image5 = CloudinaryField('image 5', null=True, default=None, blank=True)
-    image6 = CloudinaryField('image 6', null=True, default=None, blank=True)
-    image7 = CloudinaryField('image 7', null=True, default=None, blank=True)
-    image8 = CloudinaryField('image 8', null=True, default=None, blank=True)
-    image9 = CloudinaryField('image 9', null=True, default=None, blank=True)
-    image10 = CloudinaryField('image 10', null=True, default=None, blank=True)
+    image = CloudinaryField('image', null=True, default=None, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -152,3 +143,19 @@ class Transaction(models.Model):
 
     def __str__(self) -> str:
         return str(self.user_id)
+
+
+class Maintainance(models.Model):
+    user_id = models.CharField(max_length=10)
+    name = models.CharField(max_length=20)
+    phone_number = models.CharField(max_length=11)
+    maintainance_category = models.CharField(max_length=20)
+    maintainance_type = models.CharField(max_length=20)
+    status = models.CharField(max_length=20)
+    description = models.TextField()
+    date_of_complaint = models.DateField(auto_now_add=True)
+    time_of_complaint = models.TimeField(auto_now_add=True)
+
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
