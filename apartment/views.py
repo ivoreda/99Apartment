@@ -68,6 +68,7 @@ class BookApartmentView(generics.CreateAPIView):
             booking = models.ApartmentBooking.objects.create(
                 apartment_id=apartment,
                 user_id=user_id,
+                amount_paid=apartment.total_price,
                 start_date=request.data['start_date'],
                 end_date=request.data['end_date'],
                 payment_reference=reference
@@ -183,8 +184,7 @@ class SearchApartmentView(generics.ListAPIView):
             serializer = serializers.ResponseSerializer({"data": items})
             return Response(serializer.data)
         except Exception:
-            return Response({"status": False, "message":"server error"})
-
+            return Response({"status": False, "message": "server error"})
 
 
 class PaginatedListApartmentView(generics.ListAPIView):
@@ -345,3 +345,90 @@ class GetApartmentCitiesView(generics.ListAPIView):
         for i in apartment_cities:
             cities.append(i['city'])
         return Response({"status": True, "message": "Data retrieved successfully", "data": {"number_of_cities": len(cities), "cities": cities}})
+
+
+class MaintainanceRequestView(generics.CreateAPIView):
+    serializer_class = serializers.MaintainanceRequestSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid():
+            try:
+                token = request.headers.get('Authorization')
+                if token is None:
+                    raise AuthenticationFailed("unauthenticated")
+                user = user_service.get_user(token=token)
+                user_id = user['data']['id']
+                maintainance_request = models.Maintainance.objects.create(
+                    user_id=user_id,
+                    name=serializer.data.get('name'),
+                    phone_number=serializer.data.get('phone_number'),
+                    maintainance_category=serializer.data.get(
+                        'maintainance_category'),
+                    maintainance_type=serializer.data.get('maintainance_type'),
+                    description=serializer.data.get('description'),
+                    date_of_complaint=serializer.data.get('date_of_complaint'),
+                    time_of_complaint=serializer.data.get('time_of_complaint'),
+                )
+                return Response({"status": True, "message": "Maintainance request sent successfully."})
+
+            except Exception:
+                return Response({"status": False, "message": "server error"})
+
+
+class UserMaintainanceHistoryView(generics.ListAPIView):
+    serializer_class = serializers.MaintainanceSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        try:
+            token = request.headers.get('Authorization')
+            if token is None:
+                raise AuthenticationFailed("unauthenticated")
+            user = user_service.get_user(token=token)
+            user_id = user['data']['id']
+            queryset = models.Maintainance.objects.filter(user_id=user_id)
+            qs = self.serializer_class(queryset, many=True)
+            return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data})
+        except Exception:
+            return Response({"status": False, "message": "server error"})
+
+
+class TransactionDetailsView(generics.RetrieveAPIView):
+    serializer_class = serializers.TransactionSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            token = request.headers.get('Authorization')
+            if token is None:
+                raise AuthenticationFailed("unauthenticated")
+            user = user_service.get_user(token=token)
+            user_id = user['data']['id']
+            trnx_id = self.kwargs.get('id')
+            queryset = models.Transaction.objects.filter(id=trnx_id).first()
+            qs = self.serializer_class(queryset)
+            return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data})
+        except Exception:
+            return Response({"status": False, "message": "server error"})
+
+
+
+class TransactionHistoryView(generics.ListAPIView):
+    serializer_class = serializers.TransactionSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            token = request.headers.get('Authorization')
+            if token is None:
+                raise AuthenticationFailed("unauthenticated")
+            user = user_service.get_user(token=token)
+            user_id = user['data']['id']
+            queryset = models.Maintainance.objects.filter(user_id=user_id)
+            qs = self.serializer_class(queryset, many=True)
+            return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data})
+        except Exception:
+            return Response({"status": False, "message": "server error"})

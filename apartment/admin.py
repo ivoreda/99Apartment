@@ -10,6 +10,9 @@ admin.site.register(models.ApartmentReview)
 admin.site.register(models.UserData)
 admin.site.register(models.ApartmentInspection)
 
+admin.site.register(models.Maintainance)
+
+
 
 @admin.register(models.ApartmentBooking)
 class ApartmentBookingAdmin(admin.ModelAdmin):

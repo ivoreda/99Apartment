@@ -29,6 +29,11 @@ urlpatterns = [
     path('apartment-reviews/<int:id>/',
          views.ApartmentReviewsListView.as_view(), name='apartment-reviews'),
 
+     path('maintainance-request/', views.MaintainanceRequestView.as_view(), name='maintainance-request'),
+     path('user-maintainance-history/', views.UserMaintainanceHistoryView.as_view(), name='user-maintainance-history'),
+
+     path('transaction-details/<int:id>', views.TransactionDetailsView.as_view(), name='transaction-details'),
+     path('user-transaction-history/', views.TransactionHistoryView.as_view(), name='user-transaction-history'),
 
 
 ]

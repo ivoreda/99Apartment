@@ -5,7 +5,7 @@ from . import models
 class ApartmentImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ApartmentImage
-        fields = ['apartment_id','image',]
+        fields = ['apartment_id', 'images',]
 
 
 class ApartmentSerializer(serializers.ModelSerializer):
@@ -29,6 +29,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'apartment_fees',
                   'amenities',
                   'rules',
+                  'images',
                   'map_url',
                   'apartment_type',
                   'tax',
@@ -105,3 +106,25 @@ class ApartmentCitiesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
         fields = ['city']
+
+
+class MaintainanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Maintainance
+        fields = ['user_id', 'name', 'phone_number',
+                  'maintainance_category', 'maintainance_type',
+                  'status', 'description', 'cost',
+                  'date_of_complaint', 'time_of_complaint',]
+
+
+class MaintainanceRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Maintainance
+        fields = ['name', 'phone_number',
+                  'maintainance_category', 'maintainance_type',
+                  'description',]
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Transaction
+        fields = ("__all__")
