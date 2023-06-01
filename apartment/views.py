@@ -427,7 +427,7 @@ class TransactionHistoryView(generics.ListAPIView):
                 raise AuthenticationFailed("unauthenticated")
             user = user_service.get_user(token=token)
             user_id = user['data']['id']
-            queryset = models.Maintainance.objects.filter(user_id=user_id)
+            queryset = models.Transaction.objects.filter(user_id=user_id)
             qs = self.serializer_class(queryset, many=True)
             return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data})
         except Exception:
