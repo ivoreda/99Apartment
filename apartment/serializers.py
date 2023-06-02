@@ -112,7 +112,7 @@ class MaintainanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Maintainance
         fields = ['user_id', 'name', 'phone_number',
-                  'maintainance_category', 'maintainance_type',
+                  'maintenance_category', 'maintenance_type',
                   'status', 'description', 'cost',
                   'date_of_complaint', 'time_of_complaint',]
 
@@ -121,7 +121,7 @@ class MaintainanceRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Maintainance
         fields = ['name', 'phone_number',
-                  'maintainance_category', 'maintainance_type',
+                  'maintenance_category', 'maintenance_type',
                   'description',]
 
 class TransactionSerializer(serializers.ModelSerializer):

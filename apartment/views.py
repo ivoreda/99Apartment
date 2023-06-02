@@ -40,7 +40,7 @@ class UnlistApartmentView(generics.UpdateAPIView):
     pass
 
 
-class BookApartmentView(generics.CreateAPIView):
+class CheckoutApartmentView(generics.ListAPIView):
     """View for user to book apartment"""
     serializer_class = serializers.ApartmentBookingSerializer
     authentication_classes = [TokenAuthentication]
@@ -88,6 +88,57 @@ class BookApartmentView(generics.CreateAPIView):
             )
 
             return Response({"message": "Apartment booked successfully", "data": {"authorization_url": authorization_url, "reference": reference}}, status=status.HTTP_201_CREATED)
+        # except Exception:
+        #     return Response({"error": True, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BookApartmentView(generics.CreateAPIView):
+    """View for user to book apartment"""
+    serializer_class = serializers.ApartmentBookingSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid():
+            token = request.headers.get('Authorization')
+            if token is None:
+                return Response({"error": True, "message": "unauthenticated"})
+            user = user_service.get_user(token=token)
+            apartment = models.Apartment.objects.get(
+                id=serializer.data['apartment_id'])
+            user_id = user['data']['id']
+            user_email = user['data']['email']
+            if apartment.isOccupied:
+                return Response({"status": False, "message": "This apartment is full"})
+
+            paystack_response = paystack_api.initialise_transaction(
+                email=user_email, amount=apartment.total_price)
+            authorization_url = paystack_response['data']['authorization_url']
+            reference = paystack_response['data']['reference']
+
+            booking = models.ApartmentBooking.objects.create(
+                apartment_id=apartment,
+                user_id=user_id,
+                amount_paid=apartment.total_price,
+                start_date=request.data['start_date'],
+                end_date=request.data['end_date'],
+                payment_reference=reference
+            )
+
+            # send email to user after apartment has been booked
+
+            # save transaction details after apartment has been booked
+            trnx_details = models.Transaction.objects.create(
+                user_id=user_id,
+                amount=apartment.total_price,
+                payment_reference=reference,
+                transaction_status="pending",
+                description="Apartment Boooking",
+                recipient="99Apartment",
+                payment_method="PayStack",
+            )
+            return Response({"message": "Apartment booked successfully", "data": {"authorization_url": authorization_url, "reference": reference, "user": user['data']}}, status=status.HTTP_201_CREATED)
         # except Exception:
         #     return Response({"error": True, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -193,12 +244,20 @@ class PaginatedListApartmentView(generics.ListAPIView):
     queryset = models.Apartment.objects.filter(isOccupied=False)
 
     def get(self, request, *args, **kwargs):
+        city = request.query_params.get('city', None)
+        no_of_rooms = request.query_params.get('no_of_rooms', None)
         try:
+            if city:
+                items = models.Apartment.objects.filter(city=city)
+            if no_of_rooms:
+                items = models.Apartment.objects.filter(
+                    number_of_rooms=no_of_rooms)
+            serializer = serializers.ResponseSerializer({"data": items})
+            return Response(serializer.data)
+        except Exception:
             queryset = self.filter_queryset(self.get_queryset())
             serializer = serializers.ResponseSerializer({"data": queryset})
             return Response(serializer.data)
-        except Exception:
-            return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ApartmentDetailView(generics.RetrieveAPIView):
@@ -413,7 +472,6 @@ class TransactionDetailsView(generics.RetrieveAPIView):
             return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data})
         except Exception:
             return Response({"status": False, "message": "server error"})
-
 
 
 class TransactionHistoryView(generics.ListAPIView):

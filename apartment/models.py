@@ -25,9 +25,9 @@ class Apartment(models.Model):
 
     apartment_fees = models.JSONField(default=dict, blank=True, null=True)
     amenities = models.JSONField(
-        default={"amenities": []}, blank=True, null=True)
-    rules = models.JSONField(default={"rules": []}, blank=True, null=True)
-    images = models.JSONField(default={"images": []}, blank=True, null=True)
+        default=[], blank=True, null=True)
+    rules = models.JSONField(default=[], blank=True, null=True)
+    images = models.JSONField(default=[], blank=True, null=True)
 
 
     map_url = models.TextField(default="map url", blank=True, null=True)
@@ -112,7 +112,7 @@ class ApartmentInspection(models.Model):
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     user_id = models.CharField(max_length=10)
     inspection_date = models.DateField()
-    inspection_time = models.TimeField()
+    inspection_time = models.CharField(max_length=30)
     isInspected = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -150,13 +150,13 @@ class Transaction(models.Model):
         return str(self.user_id)
 
 
-MAINTAINANCE_TYPE = (('Electrical', 'Electrical'),
+MAINTENANCE_TYPE = (('Electrical', 'Electrical'),
                      ('Structural', 'Structural'),)
 
-MAINTAINANCE_CATEGORY = (('Routine', 'Routine'),
+MAINTENANCE_CATEGORY = (('Routine', 'Routine'),
                          ('Emergency', 'Emergency'),)
 
-MAINTAINANCE_STATUS = (('Pending', 'Pending'),
+MAINTENANCE_STATUS = (('Pending', 'Pending'),
                        ('Done', 'Done'),)
 
 
@@ -164,16 +164,16 @@ class Maintainance(models.Model):
     user_id = models.CharField(max_length=10)
     name = models.CharField(max_length=20)
     phone_number = models.CharField(max_length=11)
-    maintainance_category = models.CharField(
-        choices=MAINTAINANCE_CATEGORY, max_length=20, default='Routine')
-    maintainance_type = models.CharField(
-        choices=MAINTAINANCE_TYPE, max_length=20, default='Structural')
+    maintenance_category = models.CharField(
+        choices=MAINTENANCE_CATEGORY, max_length=20, default='Routine')
+    maintenance_type = models.CharField(
+        choices=MAINTENANCE_TYPE, max_length=20, default='Structural')
     status = models.CharField(
-        choices=MAINTAINANCE_STATUS, max_length=20, default='Pending')
+        choices=MAINTENANCE_STATUS, max_length=20, default='Pending')
     description = models.TextField()
     cost = models.IntegerField(default=0)
     date_of_complaint = models.DateField(auto_now_add=True)
-    time_of_complaint = models.TimeField(auto_now_add=True)
+    time_of_complaint = models.CharField(max_length=30)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
