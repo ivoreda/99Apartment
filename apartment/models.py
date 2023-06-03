@@ -33,7 +33,8 @@ class Apartment(models.Model):
     map_url = models.TextField(default="map url", blank=True, null=True)
     apartment_type = models.CharField(
         choices=APARTMENT_TYPE, default='Shared Housing', blank=True, null=True, max_length=255)
-    tax = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+    tax = models.DecimalField(default=7.5, decimal_places=1, max_digits=10)
+    tax_price = models.DecimalField(default=0, decimal_places=1, max_digits=10)
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     number_of_reviews = models.IntegerField(default=0)
 
@@ -54,6 +55,10 @@ class Apartment(models.Model):
             self.hasOccupants = True
         else:
             self.hasOccupants = False
+        total_apartment_fees = [int(value) for value in self.apartment_fees.values()]
+        print("total apt fees ",total_apartment_fees)
+        self.tax_price = self.price * self.tax / 100
+        self.total_price = self.tax_price + self.price + sum(total_apartment_fees)
         super(Apartment, self).save(*args, **kwargs)
 
 
@@ -77,9 +82,15 @@ class ApartmentBooking(models.Model):
     isPaidFor = models.BooleanField(default=False)
     amount_paid = models.IntegerField(default=0)
     user_id = models.CharField(max_length=255)
+    payment_link = models.CharField(max_length=255, default='payment link')
+    email = models.EmailField(default='email')
+    first_name = models.CharField(default='first name')
+    last_name = models.CharField(default='last name')
+    phone_number = models.CharField(default='phone number')
     start_date = models.DateField()
     end_date = models.DateField()
     payment_reference = models.CharField(max_length=255)
+    cover_photo = models.TextField(default='photo')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

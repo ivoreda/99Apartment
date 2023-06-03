@@ -11,6 +11,7 @@ urlpatterns = [
     path('book/', views.BookApartmentView.as_view(), name='book'),
     path('verify-booking/', views.VerifyApartmentBooking.as_view(),
          name='verify-booking'),
+    path('checkout/<str:reference>/', views.CheckoutApartmentView.as_view(), name='checkout'),
 
     path('book-apartment-inpection/', views.BookApartmentInspectionView.as_view(),
          name='book-apartment-inpection'),

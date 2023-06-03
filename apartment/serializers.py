@@ -33,6 +33,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'map_url',
                   'apartment_type',
                   'tax',
+                  'tax_price',
                   'rating',
                   'number_of_reviews',
                   'image',
@@ -47,6 +48,15 @@ class ApartmentBookingSerializer(serializers.ModelSerializer):
         fields = ['apartment_id',
                   'start_date',
                   'end_date']
+
+
+class CheckoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ApartmentBooking
+        fields = ['apartment_id', 'isPaidFor', 'amount_paid',
+                  'user_id', 'payment_link', 'email', 'first_name',
+                  'last_name', 'phone_number', 'start_date',
+                  'end_date', 'payment_reference', 'cover_photo',]
 
 
 class VerifyApartmentBookingSerializer(serializers.ModelSerializer):
@@ -123,6 +133,7 @@ class MaintainanceRequestSerializer(serializers.ModelSerializer):
         fields = ['name', 'phone_number',
                   'maintenance_category', 'maintenance_type',
                   'description',]
+
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
