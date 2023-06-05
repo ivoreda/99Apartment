@@ -44,22 +44,32 @@ class CheckoutApartmentView(generics.ListAPIView):
     """View for user to book apartment"""
     serializer_class = serializers.CheckoutSerializer
     authentication_classes = [TokenAuthentication]
+    pagination_class = None
 
     def get(self, request, *args, **kwargs):
-        # try:
-        reference = self.kwargs.get('reference')
-        booking = models.ApartmentBooking.objects.filter(
-            payment_reference=reference).first()
-        apartment_id = booking.apartment_id.id
-        apartment = models.Apartment.objects.filter(
-            id=apartment_id).first()
+        try:
+            token = request.headers.get('Authorization')
+            if token is None:
+                return Response({"error": True, "message": "unauthenticated"})
+            try:
+                modified_token = token[7:]
+                user = user_service.get_user(token=modified_token)
+                user_id = user['data']['id']
+            except Exception:
+                return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            reference = self.kwargs.get('reference')
+            booking = models.ApartmentBooking.objects.filter(
+                payment_reference=reference).first()
+            apartment_id = booking.apartment_id.id
+            apartment = models.Apartment.objects.filter(
+                id=apartment_id).first()
 
-        apartment_data = serializers.ApartmentSerializer(apartment)
+            apartment_data = serializers.ApartmentSerializer(apartment)
 
-        serializer = self.serializer_class(booking)
-        return Response({"status": True, "message": "Booking retrieved successfully", "data": {"user details": serializer.data, "apartment details": apartment_data.data}}, status=status.HTTP_200_OK)
-        # except Exception:
-        #     return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+            serializer = self.serializer_class(booking)
+            return Response({"status": True, "message": "Booking retrieved successfully", "data": {"user details": serializer.data, "apartment details": apartment_data.data}}, status=status.HTTP_200_OK)
+        except Exception:
+            return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BookApartmentView(generics.CreateAPIView):
@@ -76,7 +86,8 @@ class BookApartmentView(generics.CreateAPIView):
                 if token is None:
                     return Response({"error": True, "message": "unauthenticated"})
                 try:
-                    user = user_service.get_user(token=token)
+                    modified_token = token[7:]
+                    user = user_service.get_user(token=modified_token)
                     user_id = user['data']['id']
                 except Exception:
                     return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -138,7 +149,8 @@ class VerifyApartmentBooking(APIView):
             if token is None:
                 return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
             try:
-                user = user_service.get_user(token=token)
+                modified_token = token[7:]
+                user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
             except Exception:
                 return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -147,11 +159,10 @@ class VerifyApartmentBooking(APIView):
 
             paystack_payment_verification_status = paystack_api.verify_transaction(
                 reference=payment_reference)
-            print("payment verification", paystack_payment_verification_status)
-            if paystack_payment_verification_status['data']['status'] == True:
+            if paystack_payment_verification_status['data']['status'] == 'success':
                 apartment_booking = models.ApartmentBooking.objects.filter(
                     payment_reference=payment_reference).first()
-                apartment_id = apartment_booking.apartment_id
+                apartment_id = apartment_booking.apartment_id.id
                 apartment_booking.isPaidFor = True
                 apartment_booking.save()
                 apartment = models.Apartment.objects.filter(
@@ -261,6 +272,7 @@ class BookApartmentInspectionView(generics.CreateAPIView):
     """View for booking apartment inspection"""
     serializer_class = serializers.BookApartmentInsectionSerializer
     authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -270,7 +282,8 @@ class BookApartmentInspectionView(generics.CreateAPIView):
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token=token)
+                modified_token = token[7:]
+                user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
             except Exception:
                 return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -321,11 +334,13 @@ def send_apartment_inspection_email(user_email, address, inspection_date):
 class ApartmentReviewsListView(generics.ListAPIView):
     """View for getting an apartments reviews"""
     serializer_class = serializers.GetApartmentReviewsSerializer
+    pagination_class = None
+
     # queryset = models.ApartmentReview.objects.all()
 
     def get(self, request, *args, **kwargs):
         try:
-            apartment_id = self.kwargs.get('id')
+            apartment_id = self.kwargs.get('apartment_id')
             reviews = models.ApartmentReview.objects.filter(
                 apartment_id_id=apartment_id)
             reviewed_apartment = models.Apartment.objects.filter(
@@ -352,7 +367,8 @@ class ReviewApartmentView(generics.CreateAPIView):
                 if token is None:
                     raise AuthenticationFailed("unauthenticated")
                 try:
-                    user = user_service.get_user(token=token)
+                    modified_token = token[7:]
+                    user = user_service.get_user(token=modified_token)
                     user_id = user['data']['id']
                 except Exception:
                     return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -385,6 +401,8 @@ class ReviewApartmentView(generics.CreateAPIView):
 class GetApartmentCitiesView(generics.ListAPIView):
     """View for getting an apartments locations"""
     serializer_class = serializers.ApartmentCitiesSerializer
+    pagination_class = None
+
 
     def get(self, request, *args, **kwargs):
         apartment_cities = models.Apartment.objects.all().values()
@@ -402,30 +420,35 @@ class MaintainanceRequestView(generics.CreateAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
+            # try:
+            token = request.headers.get('Authorization')
+            if token is None:
+                raise AuthenticationFailed("unauthenticated")
             try:
-                token = request.headers.get('Authorization')
-                if token is None:
-                    raise AuthenticationFailed("unauthenticated")
-                try:
-                    user = user_service.get_user(token=token)
-                    user_id = user['data']['id']
-                except Exception:
-                    return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
-                maintainance_request = models.Maintainance.objects.create(
-                    user_id=user_id,
-                    name=serializer.data.get('name'),
-                    phone_number=serializer.data.get('phone_number'),
-                    maintainance_category=serializer.data.get(
-                        'maintainance_category'),
-                    maintainance_type=serializer.data.get('maintainance_type'),
-                    description=serializer.data.get('description'),
-                    date_of_complaint=serializer.data.get('date_of_complaint'),
-                    time_of_complaint=serializer.data.get('time_of_complaint'),
-                )
-                return Response({"status": True, "message": "Maintainance request sent successfully."}, status=status.HTTP_200_OK)
-
+                modified_token = token[7:]
+                user = user_service.get_user(token=modified_token)
+                user_id = user['data']['id']
             except Exception:
-                return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            apartment = get_user_current_apartment(user_id)
+            maintenance_request = models.Maintainance.objects.create(
+                apartment_id = apartment,
+                user_id=user_id,
+                name=serializer.data.get('name'),
+                phone_number=serializer.data.get('phone_number'),
+                maintenance_category=serializer.data.get(
+                    'maintenance_category'),
+                maintenance_type=serializer.data.get('maintenance_type'),
+                description=serializer.data.get('description')
+            )
+            return Response({"status": True, "message": "Maintainance request sent successfully."}, status=status.HTTP_200_OK)
+
+            # except Exception:
+            #     return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+
+def get_user_current_apartment(user_id):
+    apartment = models.ApartmentBooking.objects.filter(user_id=user_id).last()
+    return apartment.apartment_id
 
 
 class UserMaintainanceHistoryView(generics.ListAPIView):
@@ -438,7 +461,8 @@ class UserMaintainanceHistoryView(generics.ListAPIView):
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token=token)
+                modified_token = token[7:]
+                user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
             except Exception:
                 return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -459,7 +483,8 @@ class TransactionDetailsView(generics.RetrieveAPIView):
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token=token)
+                modified_token = token[7:]
+                user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
             except Exception:
                 return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -481,7 +506,8 @@ class TransactionHistoryView(generics.ListAPIView):
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token=token)
+                modified_token = token[7:]
+                user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
             except Exception:
                 return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)

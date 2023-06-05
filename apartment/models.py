@@ -56,7 +56,6 @@ class Apartment(models.Model):
         else:
             self.hasOccupants = False
         total_apartment_fees = [int(value) for value in self.apartment_fees.values()]
-        print("total apt fees ",total_apartment_fees)
         self.tax_price = self.price * self.tax / 100
         self.total_price = self.tax_price + self.price + sum(total_apartment_fees)
         super(Apartment, self).save(*args, **kwargs)
@@ -173,6 +172,7 @@ MAINTENANCE_STATUS = (('Pending', 'Pending'),
 
 class Maintainance(models.Model):
     user_id = models.CharField(max_length=10)
+    apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     name = models.CharField(max_length=20)
     phone_number = models.CharField(max_length=11)
     maintenance_category = models.CharField(
@@ -184,7 +184,7 @@ class Maintainance(models.Model):
     description = models.TextField()
     cost = models.IntegerField(default=0)
     date_of_complaint = models.DateField(auto_now_add=True)
-    time_of_complaint = models.CharField(max_length=30)
+    time_of_complaint = models.TimeField(auto_now_add=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

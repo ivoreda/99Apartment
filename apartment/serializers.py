@@ -9,7 +9,6 @@ class ApartmentImageSerializer(serializers.ModelSerializer):
 
 
 class ApartmentSerializer(serializers.ModelSerializer):
-    image = ApartmentImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = models.Apartment
@@ -36,7 +35,6 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'tax_price',
                   'rating',
                   'number_of_reviews',
-                  'image',
                   'total_price',
                   'created_at',
                   'updated_at',]
@@ -121,7 +119,7 @@ class ApartmentCitiesSerializer(serializers.ModelSerializer):
 class MaintainanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Maintainance
-        fields = ['user_id', 'name', 'phone_number',
+        fields = ['user_id', 'name', 'phone_number', 'apartment_id',
                   'maintenance_category', 'maintenance_type',
                   'status', 'description', 'cost',
                   'date_of_complaint', 'time_of_complaint',]

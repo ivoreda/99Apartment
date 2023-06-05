@@ -27,7 +27,7 @@ urlpatterns = [
 
     path('review/', views.ReviewApartmentView.as_view(),
          name='review'),
-    path('reviews/<int:id>/',
+    path('reviews/<int:apartment_id>/',
          views.ApartmentReviewsListView.as_view(), name='apartment-reviews'),
 
     path('maintainance-request/', views.MaintainanceRequestView.as_view(),

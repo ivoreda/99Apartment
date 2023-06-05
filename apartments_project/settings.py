@@ -111,8 +111,8 @@ WSGI_APPLICATION = "apartments_project.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME':'railway',
-        'USER':'postgres',
+        'NAME': 'railway',
+        'USER': 'postgres',
         'PASSWORD': 'bfKT6enzrqHFu3a8o16g',
         'HOST': 'containers-us-west-108.railway.app',
         'PORT': 5647,
@@ -175,11 +175,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 20,
     'COERCE_DECIMAL_TO_STRING': False,
-
 }
 
 cloudinary.config(
-  cloud_name = "groundworks",
-  api_key = "665148592363434",
-  api_secret = "d00bD14YLSvFD6kaoeEUJ5rlz9U"
+    cloud_name="groundworks",
+    api_key="665148592363434",
+    api_secret="d00bD14YLSvFD6kaoeEUJ5rlz9U"
 )
