@@ -19,6 +19,7 @@ class Apartment(models.Model):
     country = models.CharField(max_length=50, help_text="Country")
     number_of_occupants = models.IntegerField(default=0)
     number_of_rooms = models.IntegerField(default=0)
+    type_of_space = models.CharField(default='One Bedroom', max_length=40)
     hasOccupants = models.BooleanField(default=False)
     isOccupied = models.BooleanField(default=False)
     price = models.IntegerField(default=0)
