@@ -97,7 +97,11 @@ class BookApartmentView(generics.CreateAPIView):
                 if apartment.isOccupied:
                     return Response({"status": False, "message": "This apartment is full"})
 
-                print("apartmenr", apartment.images[0])
+                booking_start_date = request.data['start_date']
+                booking_end_date = request.data['end_date']
+
+                if request.data['end_date'] < request.data['start_date']:
+                    return Response({"status": False, "message": "Start date cannot be greater than end date"})
 
                 paystack_response = paystack_api.initialise_transaction(
                     email=user_email, amount=apartment.total_price)
@@ -116,6 +120,7 @@ class BookApartmentView(generics.CreateAPIView):
                     first_name=user['data']['first_name'],
                     last_name=user['data']['last_name'],
                     phone_number=user['data']['phone_number'],
+                    no_of_guests=request.data['no_of_guests'],
                     cover_photo=apartment.images[0]
                 )
 
@@ -239,12 +244,89 @@ class PaginatedListApartmentView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         city = request.query_params.get('city', None)
         no_of_rooms = request.query_params.get('no_of_rooms', None)
+        air_conditioning = request.query_params.get('air_conditioning', None)
+        kitchen = request.query_params.get('kitchen', None)
+        washer = request.query_params.get('washer', None)
+        work_space = request.query_params.get('work_space', None)
+        smoke_alarm = request.query_params.get('smoke_alarm', None)
+        pool = request.query_params.get('pool', None)
+        indoor_fireplace = request.query_params.get('indoor_fireplace', None)
+        ev_charger = request.query_params.get('ev_charger', None)
+        hot_tub = request.query_params.get('hot_tub', None)
+        free_parking = request.query_params.get('free_parking', None)
+
+        allows_pets = request.query_params.get('allows_pets', None)
+        allows_party = request.query_params.get('allows_party', None)
+        allows_smoking = request.query_params.get('allows_smoking', None)
+
+        has_tenant = request.query_params.get('has_tenant', None)
+        vacant = request.query_params.get('vacant', None)
+
         try:
             if city:
                 items = models.Apartment.objects.filter(city=city)
             if no_of_rooms:
                 items = models.Apartment.objects.filter(
                     number_of_rooms=no_of_rooms)
+            if air_conditioning:
+                items = models.Apartment.objects.filter(
+                    amenities__contains=['air conditioning'])
+
+            if kitchen:
+                items = models.Apartment.objects.filter(
+                    amenities__contains=['kitchen'])
+
+            if washer:
+                items = models.Apartment.objects.filter(
+                    amenities__contains=['washer'])
+
+            if work_space:
+                items = models.Apartment.objects.filter(
+                    amenities__contains=['work space'])
+
+            if smoke_alarm:
+                items = models.Apartment.objects.filter(
+                    amenities__contains=['smoke alarm'])
+
+            if pool:
+                items = models.Apartment.objects.filter(
+                    amenities__contains=['pool'])
+
+            if indoor_fireplace:
+                items = models.Apartment.objects.filter(
+                    amenities__contains=['indoor fireplace'])
+
+            if ev_charger:
+                items = models.Apartment.objects.filter(
+                    amenities__contains=['ev charger'])
+
+            if hot_tub:
+                items = models.Apartment.objects.filter(
+                    amenities__contains=['hot tub'])
+
+            if free_parking:
+                items = models.Apartment.objects.filter(
+                    amenities__contains=['free parking'])
+
+            if allows_pets:
+                items = models.Apartment.objects.exclude(
+                    amenities__contains=['no pets'])
+
+            if allows_party:
+                items = models.Apartment.objects.exclude(
+                    rules__contains=['no parties'])
+
+            if allows_smoking:
+                items = models.Apartment.objects.exclude(
+                    rules__contains=['no smoking'])
+
+            if has_tenant:
+                items = models.Apartment.objects.filter(
+                    hasOccupants=True, isOccupied=False)
+
+            if vacant:
+                items = models.Apartment.objects.filter(hasOccupants=False)
+
             serializer = serializers.ResponseSerializer({"data": items})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception:
@@ -403,7 +485,6 @@ class GetApartmentCitiesView(generics.ListAPIView):
     serializer_class = serializers.ApartmentCitiesSerializer
     pagination_class = None
 
-
     def get(self, request, *args, **kwargs):
         apartment_cities = models.Apartment.objects.all().values()
         cities = []
@@ -432,7 +513,7 @@ class MaintainanceRequestView(generics.CreateAPIView):
                 return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
             apartment = get_user_current_apartment(user_id)
             maintenance_request = models.Maintainance.objects.create(
-                apartment_id = apartment,
+                apartment_id=apartment,
                 user_id=user_id,
                 name=serializer.data.get('name'),
                 phone_number=serializer.data.get('phone_number'),
@@ -445,6 +526,7 @@ class MaintainanceRequestView(generics.CreateAPIView):
 
             # except Exception:
             #     return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 def get_user_current_apartment(user_id):
     apartment = models.ApartmentBooking.objects.filter(user_id=user_id).last()

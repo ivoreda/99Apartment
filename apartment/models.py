@@ -90,6 +90,7 @@ class ApartmentBooking(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     payment_reference = models.CharField(max_length=255)
+    no_of_guests = models.IntegerField(default=1)
     cover_photo = models.TextField(default='photo')
 
     created_at = models.DateTimeField(auto_now_add=True)

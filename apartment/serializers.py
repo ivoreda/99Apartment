@@ -45,6 +45,7 @@ class ApartmentBookingSerializer(serializers.ModelSerializer):
         model = models.ApartmentBooking
         fields = ['apartment_id',
                   'start_date',
+                  'no_of_guests',
                   'end_date']
 
 
@@ -54,7 +55,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
         fields = ['apartment_id', 'isPaidFor', 'amount_paid',
                   'user_id', 'payment_link', 'email', 'first_name',
                   'last_name', 'phone_number', 'start_date',
-                  'end_date', 'payment_reference', 'cover_photo',]
+                  'end_date', 'payment_reference', 'cover_photo', 'no_of_guests']
 
 
 class VerifyApartmentBookingSerializer(serializers.ModelSerializer):
