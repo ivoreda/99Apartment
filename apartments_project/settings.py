@@ -177,6 +177,14 @@ REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False,
 }
 
+# Email config
+EMAIL_HOST = 'mail.the99keys.com'
+EMAIL_HOST_USER = 'ivor.e@the99keys.com'
+EMAIL_HOST_PASSWORD = '1Vor#ee!!'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 cloudinary.config(
     cloud_name="groundworks",
     api_key="665148592363434",

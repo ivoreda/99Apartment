@@ -175,7 +175,7 @@ MAINTENANCE_STATUS = (('Pending', 'Pending'),
 class Maintainance(models.Model):
     user_id = models.CharField(max_length=10)
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=11)
     maintenance_category = models.CharField(
         choices=MAINTENANCE_CATEGORY, max_length=20, default='Routine')
