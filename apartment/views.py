@@ -124,9 +124,9 @@ class BookApartmentView(generics.CreateAPIView):
                     cover_photo=apartment.images[0]
                 )
 
-                # send email to user after apartment has been booked
+                send_apartment_booking_email(
+                    user_email, apartment.address, booking_start_date, booking_end_date)
 
-                # save transaction details after apartment has been booked
                 trnx_details = models.Transaction.objects.create(
                     user_id=user_id,
                     amount=apartment.total_price,
@@ -405,7 +405,20 @@ def send_apartment_inspection_email(user_email, address, inspection_date):
     from_email = settings.EMAIL_HOST_USER
 
     email_template = render_to_string(
-        'inspection/emails/apartment-email-booking-complete.html', {'email': user_email, 'address': address, 'inspection_date': inspection_date})
+        'inspection/emails/apartment-inspection-booking-complete.html', {'email': user_email, 'address': address, 'inspection_date': inspection_date})
+    email_verification_email = EmailMessage(
+        subject, email_template, from_email, [user_email]
+    )
+    email_verification_email.fail_silently = True
+    email_verification_email.send()
+
+
+def send_apartment_booking_email(user_email, address, start_date, end_date):
+    subject = 'Apartment Booking.'
+    from_email = settings.EMAIL_HOST_USER
+
+    email_template = render_to_string(
+        'inspection/emails/apartment-booking-complete.html', {'email': user_email, 'address': address, 'start_date': start_date, 'end_date': end_date})
     email_verification_email = EmailMessage(
         subject, email_template, from_email, [user_email]
     )
@@ -509,6 +522,7 @@ class MaintainanceRequestView(generics.CreateAPIView):
                 modified_token = token[7:]
                 user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
+                user_email = user['data']['email']
             except Exception:
                 return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
             apartment = get_user_current_apartment(user_id)
@@ -522,11 +536,24 @@ class MaintainanceRequestView(generics.CreateAPIView):
                 maintenance_type=serializer.data.get('maintenance_type'),
                 description=serializer.data.get('description')
             )
+
+            send_maintenance_request_email(user_email, apartment.address)
             return Response({"status": True, "message": "Maintainance request sent successfully."}, status=status.HTTP_200_OK)
 
             # except Exception:
             #     return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
 
+def send_maintenance_request_email(user_email, address):
+    subject = 'Apartment Maintenance Request.'
+    from_email = settings.EMAIL_HOST_USER
+
+    email_template = render_to_string(
+        'inspection/emails/apartment-maintenance-request-complete.html', {'email': user_email, 'address': address})
+    email_verification_email = EmailMessage(
+        subject, email_template, from_email, [user_email]
+    )
+    email_verification_email.fail_silently = True
+    email_verification_email.send()
 
 def get_user_current_apartment(user_id):
     apartment = models.ApartmentBooking.objects.filter(user_id=user_id).last()
