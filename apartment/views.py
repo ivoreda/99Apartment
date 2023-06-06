@@ -50,13 +50,17 @@ class CheckoutApartmentView(generics.ListAPIView):
         try:
             token = request.headers.get('Authorization')
             if token is None:
-                return Response({"error": True, "message": "unauthenticated"})
+                return Response({"status": False, "message": "unauthenticated"})
             try:
                 modified_token = token[7:]
                 user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
+                verified_status = user['data']['isVerified']
             except Exception:
-                return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            if not verified_status:
+                return Response({"status": False, "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+
             reference = self.kwargs.get('reference')
             booking = models.ApartmentBooking.objects.filter(
                 payment_reference=reference).first()
@@ -84,13 +88,17 @@ class BookApartmentView(generics.CreateAPIView):
             try:
                 token = request.headers.get('Authorization')
                 if token is None:
-                    return Response({"error": True, "message": "unauthenticated"})
+                    return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
                 try:
                     modified_token = token[7:]
                     user = user_service.get_user(token=modified_token)
                     user_id = user['data']['id']
+                    verified_status = user['data']['isVerified']
                 except Exception:
-                    return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                    return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                if not verified_status:
+                    return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+
                 apartment = models.Apartment.objects.get(
                     id=serializer.data['apartment_id'])
                 user_email = user['data']['email']
@@ -138,7 +146,7 @@ class BookApartmentView(generics.CreateAPIView):
                 )
                 return Response({"status": True, "message": "Apartment booked successfully", "data": {"reference": reference}}, status=status.HTTP_201_CREATED)
             except Exception:
-                return Response({"error": True, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class VerifyApartmentBooking(APIView):
@@ -152,13 +160,17 @@ class VerifyApartmentBooking(APIView):
         if serializer.is_valid():
             token = request.headers.get('Authorization')
             if token is None:
-                return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
             try:
                 modified_token = token[7:]
                 user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
+                verified_status = user['data']['isVerified']
             except Exception:
-                return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            if not verified_status:
+                return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+
 
             payment_reference = serializer.data.get('payment_reference')
 
@@ -367,8 +379,12 @@ class BookApartmentInspectionView(generics.CreateAPIView):
                 modified_token = token[7:]
                 user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
+                verified_status = user['data']['isVerified']
             except Exception:
-                return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            if not verified_status:
+                return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+
             user_email = user['data']['email']
             apartment = models.Apartment.objects.get(
                 id=serializer.data['apartment_id'])
@@ -466,7 +482,7 @@ class ReviewApartmentView(generics.CreateAPIView):
                     user = user_service.get_user(token=modified_token)
                     user_id = user['data']['id']
                 except Exception:
-                    return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                    return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
                 review = serializer.data.get('review')
                 rating = serializer.data.get('rating')
                 if float(rating) > 5:
@@ -523,8 +539,12 @@ class MaintainanceRequestView(generics.CreateAPIView):
                 user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
                 user_email = user['data']['email']
+                verified_status = user['data']['isVerified']
             except Exception:
-                return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            if not verified_status:
+                return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+
             apartment = get_user_current_apartment(user_id)
             maintenance_request = models.Maintainance.objects.create(
                 apartment_id=apartment,
@@ -573,8 +593,12 @@ class UserMaintainanceHistoryView(generics.ListAPIView):
                 modified_token = token[7:]
                 user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
+                verified_status = user['data']['isVerified']
             except Exception:
-                return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            if not verified_status:
+                return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+
             queryset = models.Maintainance.objects.filter(user_id=user_id)
             qs = self.serializer_class(queryset, many=True)
             return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data}, status=status.HTTP_200_OK)
@@ -595,8 +619,12 @@ class TransactionDetailsView(generics.RetrieveAPIView):
                 modified_token = token[7:]
                 user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
+                verified_status = user['data']['isVerified']
             except Exception:
-                return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            if not verified_status:
+                return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+
             trnx_id = self.kwargs.get('id')
             queryset = models.Transaction.objects.filter(id=trnx_id).first()
             qs = self.serializer_class(queryset)
@@ -618,8 +646,12 @@ class TransactionHistoryView(generics.ListAPIView):
                 modified_token = token[7:]
                 user = user_service.get_user(token=modified_token)
                 user_id = user['data']['id']
+                verified_status = user['data']['isVerified']
             except Exception:
-                return Response({"error": True, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            if not verified_status:
+                return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+
             queryset = models.Transaction.objects.filter(user_id=user_id)
             qs = self.serializer_class(queryset, many=True)
             return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data}, status=status.HTTP_200_OK)
