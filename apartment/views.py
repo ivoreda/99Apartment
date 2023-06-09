@@ -209,7 +209,7 @@ class VerifyApartmentBooking(APIView):
     """View for verifying apartment booking payment"""
 
     def post(self, request, *args, **kwargs):
-        payment_reference = self.kwargs.get('payment_reference')
+        payment_reference = self.kwargs.get('reference')
 
         paystack_payment_verification_status = paystack_api.verify_transaction(
             reference=payment_reference)
