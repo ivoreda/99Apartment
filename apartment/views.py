@@ -42,7 +42,7 @@ class ListApartmentView(generics.CreateAPIView):
             if token is None:
                 return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
             try:
-                user = user_service.get_user(token)
+                user = user_service.get_user(token=token)
                 user_id = user['data']['id']
                 user_name = user['data']['first_name'] + \
                     " " + user['data']['last_name']
@@ -79,7 +79,7 @@ class UnlistApartmentView(generics.UpdateAPIView):
             if token is None:
                 return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
             try:
-                user = user_service.get_user(token)
+                user = user_service.get_user(token=token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
                 profile_type = user['data']['profile_type']
@@ -108,7 +108,7 @@ class CheckoutApartmentView(generics.ListAPIView):
             if token is None:
                 return Response({"status": False, "message": "unauthenticated"})
             try:
-                user = user_service.get_user(token)
+                user = user_service.get_user(token=token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
             except Exception:
@@ -142,10 +142,12 @@ class BookApartmentView(generics.CreateAPIView):
         if serializer.is_valid():
             try:
                 token = request.headers.get('Authorization')
+                print(token)
                 if token is None:
                     return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
                 try:
-                    user = user_service.get_user(token)
+                    user = user_service.get_user(token=token)
+                    print(user)
                     user_id = user['data']['id']
                     verified_status = user['data']['isVerified']
                 except Exception:
@@ -411,7 +413,7 @@ class BookApartmentInspectionView(generics.CreateAPIView):
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token)
+                user = user_service.get_user(token=token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
             except Exception:
@@ -512,7 +514,7 @@ class ReviewApartmentView(generics.CreateAPIView):
                 if token is None:
                     raise AuthenticationFailed("unauthenticated")
                 try:
-                    user = user_service.get_user(token)
+                    user = user_service.get_user(token=token)
                     user_id = user['data']['id']
                 except Exception:
                     return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -568,7 +570,7 @@ class MaintainanceRequestView(generics.CreateAPIView):
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token)
+                user = user_service.get_user(token=token)
                 user_id = user['data']['id']
                 user_email = user['data']['email']
                 verified_status = user['data']['isVerified']
@@ -624,7 +626,7 @@ class UserMaintainanceHistoryView(generics.ListAPIView):
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token)
+                user = user_service.get_user(token=token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
             except Exception:
@@ -649,7 +651,7 @@ class TransactionDetailsView(generics.RetrieveAPIView):
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token)
+                user = user_service.get_user(token=token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
             except Exception:
@@ -675,7 +677,7 @@ class TransactionHistoryView(generics.ListAPIView):
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token)
+                user = user_service.get_user(token=token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
             except Exception:
