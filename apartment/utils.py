@@ -5,6 +5,8 @@ baseUrl = "https://user-service-production-7c6d.up.railway.app"
 
 # baseUrl = "http://127.0.0.1:8001"
 
+paystack_callback_url = "https://99apartment-production.up.railway.app/apartments/verify-booking/"
+
 class UserService:
 
     def get_user(self, **kwargs):
@@ -14,7 +16,7 @@ class UserService:
         token = kwargs.get('token')
 
         headers = {
-        'Authorization': 'Bearer {token}'.format(token=token),
+        'Authorization': '{token}'.format(token=token),
         'Accept': 'application/json'
         }
 
@@ -38,7 +40,8 @@ class PaystackAPI:
         str_amount = str(amount)
         payload = json.dumps({
             "email": customer_email,
-            "amount": str_amount
+            "amount": str_amount,
+            "callback_url": paystack_callback_url
         })
         print("payload", payload)
 

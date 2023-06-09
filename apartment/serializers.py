@@ -12,32 +12,27 @@ class ApartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Apartment
-        fields = ['id',
-                  'name',
-                  'description',
-                  'address',
-                  'lga',
-                  'city',
-                  'state',
-                  'country',
-                  'number_of_occupants',
-                  'number_of_rooms',
-                  'hasOccupants',
-                  'isOccupied',
-                  'price',
-                  'apartment_fees',
-                  'amenities',
-                  'rules',
-                  'images',
-                  'map_url',
-                  'apartment_type',
-                  'tax',
-                  'tax_price',
-                  'rating',
-                  'number_of_reviews',
-                  'total_price',
-                  'created_at',
-                  'updated_at',]
+        fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
+                  'address', 'lga', 'city', 'state', 'country',
+                  'number_of_occupants', 'number_of_rooms', 'hasOccupants', 'isOccupied',
+                  'price', 'apartment_fees', 'amenities', 'rules', 'images',
+                  'map_url', 'apartment_type', 'tax', 'tax_price', 'rating',
+                  'number_of_reviews', 'total_price', 'created_at', 'updated_at',]
+
+
+class ListApartmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Apartment
+        fields = ['owner_id', 'owner_name', 'name', 'description',
+                  'address', 'lga', 'city', 'state', 'country',
+                  'number_of_rooms', 'price', 'apartment_fees',
+                  'amenities', 'rules', 'images', 'map_url', 'apartment_type']
+
+class UnlistApartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Apartment
+        fields = ['id']
 
 
 class ApartmentBookingSerializer(serializers.ModelSerializer):

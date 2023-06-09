@@ -9,7 +9,7 @@ urlpatterns = [
 
     # For users
     path('book/', views.BookApartmentView.as_view(), name='book'),
-    path('verify-booking/', views.VerifyApartmentBooking.as_view(),
+    path('verify-booking/<str:reference>', views.VerifyApartmentBooking.as_view(),
          name='verify-booking'),
     path('checkout/<str:reference>/', views.CheckoutApartmentView.as_view(), name='checkout'),
 

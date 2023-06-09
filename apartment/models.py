@@ -10,7 +10,15 @@ class Apartment(models.Model):
     APARTMENT_TYPE = (('Shared Housing', 'Shared Housing'),
                       ('Credit Renting', 'Credit Renting'),)
 
+    APARTMENT_STATUS = (('Listed', 'Listed'),
+                        ('Unlisted', 'Unlisted'),)
+
+    owner_id = models.CharField(
+        max_length=255, help_text='Apartment owner ID', default='owner ID')
+    owner_name = models.CharField(
+        max_length=255, help_text='Apartment owner name', default='owner name')
     name = models.CharField(max_length=255, help_text="Apartment name")
+    status = models.CharField(max_length=255, choices=APARTMENT_STATUS, default='Unlisted')
     description = models.TextField(help_text="Enter apartment description")
     address = models.TextField(help_text="Enter apartment address")
     lga = models.CharField(max_length=50, help_text="LGA")
@@ -29,7 +37,6 @@ class Apartment(models.Model):
         default=[], blank=True, null=True)
     rules = models.JSONField(default=[], blank=True, null=True)
     images = models.JSONField(default=[], blank=True, null=True)
-
 
     map_url = models.TextField(default="map url", blank=True, null=True)
     apartment_type = models.CharField(
@@ -56,9 +63,11 @@ class Apartment(models.Model):
             self.hasOccupants = True
         else:
             self.hasOccupants = False
-        total_apartment_fees = [int(value) for value in self.apartment_fees.values()]
+        total_apartment_fees = [int(value)
+                                for value in self.apartment_fees.values()]
         self.tax_price = self.price * self.tax / 100
-        self.total_price = self.tax_price + self.price + sum(total_apartment_fees)
+        self.total_price = self.tax_price + \
+            self.price + sum(total_apartment_fees)
         super(Apartment, self).save(*args, **kwargs)
 
 
@@ -134,14 +143,14 @@ class ApartmentInspection(models.Model):
         return str(self.apartment_id)
 
 
-TRANSACTION_TYPE = (('Annual Rent', 'Annual Rent'),
-                    ('Maintainance', 'Maintainance'),)
-
-TRANSACTION_STATUS = (('Pending', 'Pending'),
-                      ('Done', 'Done'),)
-
-
 class Transaction(models.Model):
+
+    TRANSACTION_TYPE = (('Annual Rent', 'Annual Rent'),
+                        ('Maintainance', 'Maintainance'),)
+
+    TRANSACTION_STATUS = (('Pending', 'Pending'),
+                          ('Done', 'Done'),)
+
     user_id = models.CharField(max_length=10)
     amount = models.CharField(max_length=10)
     transaction_status = models.CharField(
@@ -162,17 +171,17 @@ class Transaction(models.Model):
         return str(self.user_id)
 
 
-MAINTENANCE_TYPE = (('Electrical', 'Electrical'),
-                     ('Structural', 'Structural'),)
-
-MAINTENANCE_CATEGORY = (('Routine', 'Routine'),
-                         ('Emergency', 'Emergency'),)
-
-MAINTENANCE_STATUS = (('Pending', 'Pending'),
-                       ('Done', 'Done'),)
-
-
 class Maintainance(models.Model):
+
+    MAINTENANCE_TYPE = (('Electrical', 'Electrical'),
+                        ('Structural', 'Structural'),)
+
+    MAINTENANCE_CATEGORY = (('Routine', 'Routine'),
+                            ('Emergency', 'Emergency'),)
+
+    MAINTENANCE_STATUS = (('Pending', 'Pending'),
+                          ('Done', 'Done'),)
+
     user_id = models.CharField(max_length=10)
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
