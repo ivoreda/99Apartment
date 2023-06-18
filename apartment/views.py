@@ -217,6 +217,8 @@ class VerifyApartmentBooking(APIView):
             apartment_booking = models.ApartmentBooking.objects.filter(
                 payment_reference=payment_reference).first()
             apartment_id = apartment_booking.apartment_id.id
+            if apartment_booking.isPaidFor == True:
+                return Response({"status": False, "message": "This payment has been verified already."})
             apartment_booking.isPaidFor = True
             apartment_booking.save()
             apartment = models.Apartment.objects.filter(
