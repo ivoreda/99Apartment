@@ -27,6 +27,8 @@ class Apartment(models.Model):
     country = models.CharField(max_length=50, help_text="Country")
     number_of_occupants = models.IntegerField(default=0)
     number_of_rooms = models.IntegerField(default=0)
+    number_of_bathrooms = models.IntegerField(default=0)
+    number_of_toilets = models.IntegerField(default=0)
     type_of_space = models.CharField(default='One Bedroom', max_length=40)
     hasOccupants = models.BooleanField(default=False)
     isOccupied = models.BooleanField(default=False)
@@ -119,6 +121,8 @@ class ApartmentReview(models.Model):
     apartment_id = models.ForeignKey(
         Apartment, on_delete=models.CASCADE, default=0)
     user_id = models.CharField(max_length=255)
+    username = models.CharField(default='username')
+    user_photo = models.CharField(default='user photo')
     review = models.TextField()
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
 
