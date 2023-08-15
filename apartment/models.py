@@ -10,6 +10,9 @@ class Apartment(models.Model):
     APARTMENT_TYPE = (('Shared Housing', 'Shared Housing'),
                       ('Credit Renting', 'Credit Renting'),)
 
+    LEASE_TYPE = (('Short Lease', 'Short Lease'),
+                  ('Long Lease', 'Long Lease'))
+
     APARTMENT_STATUS = (('Listed', 'Listed'),
                         ('Unlisted', 'Unlisted'),)
 
@@ -24,7 +27,7 @@ class Apartment(models.Model):
     lga = models.CharField(max_length=50, help_text="LGA")
     city = models.CharField(max_length=50, help_text="City")
     state = models.CharField(max_length=20, help_text="State")
-    country = models.CharField(max_length=50, help_text="Country")
+
     number_of_occupants = models.IntegerField(default=0)
     number_of_rooms = models.IntegerField(default=0)
     number_of_bathrooms = models.IntegerField(default=0)
@@ -38,7 +41,6 @@ class Apartment(models.Model):
     amenities = models.JSONField(
         default=[], blank=True, null=True)
     rules = models.JSONField(default=[], blank=True, null=True)
-    images = models.JSONField(default=[], blank=True, null=True)
 
     map_url = models.TextField(default="map url", blank=True, null=True)
     apartment_type = models.CharField(
@@ -48,7 +50,16 @@ class Apartment(models.Model):
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     number_of_reviews = models.IntegerField(default=0)
 
+
+    image1 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
+    image2 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
+    image3 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
+    image4 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
+    image5 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
+
     total_price = models.IntegerField(default=0)
+    is_draft = models.BooleanField(default=False)
+    cancellation_policy = models.TextField(default="")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -175,7 +186,7 @@ class Transaction(models.Model):
         return str(self.user_id)
 
 
-class Maintainance(models.Model):
+class Maintenance(models.Model):
 
     MAINTENANCE_TYPE = (('Electrical', 'Electrical'),
                         ('Structural', 'Structural'),)
@@ -206,3 +217,31 @@ class Maintainance(models.Model):
 
     def __str__(self) -> str:
         return f"maintainance request from '{self.name}'"
+
+
+# class Service(models.Model):
+#     SERVICE_PAYMENT_STATUS = (('Pending', 'Pending'),
+#                           ('Paid', 'Paid'),)
+
+
+
+
+class ApartmentAmenities(models.Model):
+    amenity = models.CharField(max_length=50)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.amenity
+
+
+class ApartmentRules(models.Model):
+    rule = models.CharField(max_length=50)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.rule
+

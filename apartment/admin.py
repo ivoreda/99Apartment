@@ -10,7 +10,7 @@ admin.site.register(models.ApartmentReview)
 admin.site.register(models.UserData)
 admin.site.register(models.ApartmentInspection)
 
-admin.site.register(models.Maintainance)
+admin.site.register(models.Maintenance)
 
 
 
@@ -22,7 +22,7 @@ class ApartmentBookingAdmin(admin.ModelAdmin):
 
 @admin.register(models.Apartment)
 class ApartmentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'city', 'number_of_occupants', 'hasOccupants', 'isOccupied',
+    list_display = ['id', 'city', 'is_draft', 'number_of_occupants', 'hasOccupants', 'isOccupied',
                     'rating',]
 
 
@@ -30,3 +30,11 @@ class ApartmentAdmin(admin.ModelAdmin):
 class TransactionAdmin(admin.ModelAdmin):
     list_display = ['user_id', 'amount', 'transaction_status',
                     'payment_reference', 'created_at', 'updated_at',]
+
+@admin.register(models.ApartmentAmenities)
+class ApartmentAmenitiesAdmin(admin.ModelAdmin):
+    list_display = ['id', 'amenity']
+
+@admin.register(models.ApartmentRules)
+class ApartmentRulesAdmin(admin.ModelAdmin):
+    list_display = ['id', 'rule']

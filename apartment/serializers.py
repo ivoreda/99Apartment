@@ -9,25 +9,79 @@ class ApartmentImageSerializer(serializers.ModelSerializer):
 
 
 class ApartmentSerializer(serializers.ModelSerializer):
+    maintenance_requests = serializers.IntegerField(read_only=True)
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Apartment
         fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
-                  'address', 'lga', 'city', 'state', 'country',
+                  'address', 'lga', 'city', 'state',
                   'number_of_occupants', 'number_of_rooms', 'hasOccupants', 'isOccupied',
                   'price', 'apartment_fees', 'amenities', 'rules', 'images',
                   'map_url', 'apartment_type', 'tax', 'tax_price', 'rating',
-                  'number_of_reviews', 'total_price', 'created_at', 'updated_at',]
+                  'number_of_reviews', 'total_price', 'created_at', 'updated_at', 'maintenance_requests']
+
+    def get_images(self, obj):
+        image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']
+        images = {}
+        for field in image_fields:
+            image = getattr(obj, field)
+            if image:
+                images[field] = image.url
+        return images
 
 
 class ListApartmentSerializer(serializers.ModelSerializer):
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Apartment
         fields = ['owner_id', 'owner_name', 'name', 'description',
-                  'address', 'lga', 'city', 'state', 'country',
+                  'address', 'lga', 'city', 'state',
                   'number_of_rooms', 'price', 'apartment_fees',
-                  'amenities', 'rules', 'images', 'map_url', 'apartment_type']
+                  'amenities', 'rules', 'images', 'map_url', 'apartment_type', 'is_draft']
+
+    def get_images(self, obj):
+        image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']
+        images = {}
+        for field in image_fields:
+            image = getattr(obj, field)
+            if image:
+                images[field] = image.url
+        return images
+
+
+class GetApartmentAmenitiesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ApartmentAmenities
+        fields = ['id', 'amenity']
+
+
+class GetApartmentRulesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ApartmentRules
+        fields = ['id', 'rule']
+
+
+class SaveApartmentDraftSerializer(serializers.ModelSerializer):
+    images = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Apartment
+        fields = ['owner_id', 'owner_name', 'name', 'description',
+                  'address', 'lga', 'city', 'state',
+                  'number_of_rooms', 'price', 'apartment_fees',
+                  'amenities', 'rules', 'images', 'map_url', 'apartment_type', 'is_draft']
+
+    def get_images(self, obj):
+        image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']
+        images = {}
+        for field in image_fields:
+            image = getattr(obj, field)
+            if image:
+                images[field] = image.url
+        return images
+
 
 class UnlistApartmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -112,18 +166,18 @@ class ApartmentCitiesSerializer(serializers.ModelSerializer):
         fields = ['city']
 
 
-class MaintainanceSerializer(serializers.ModelSerializer):
+class MaintenanceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Maintainance
+        model = models.Maintenance
         fields = ['user_id', 'name', 'phone_number', 'apartment_id',
                   'maintenance_category', 'maintenance_type',
                   'status', 'description', 'cost',
                   'date_of_complaint', 'time_of_complaint',]
 
 
-class MaintainanceRequestSerializer(serializers.ModelSerializer):
+class MaintenanceRequestSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Maintainance
+        model = models.Maintenance
         fields = ['name', 'phone_number',
                   'maintenance_category', 'maintenance_type',
                   'description',]

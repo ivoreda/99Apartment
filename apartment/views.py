@@ -1,9 +1,19 @@
 from rest_framework import generics
 from rest_framework.views import APIView
 
+from django.db.models import Count
+
+
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
+
+from drf_yasg.utils import swagger_auto_schema
+
+
+from rest_framework.parsers import MultiPartParser, FormParser
+import cloudinary
+import cloudinary.uploader
 
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
@@ -33,36 +43,131 @@ class ListApartmentView(generics.CreateAPIView):
     """View for listing apartment on platform"""
     serializer_class = serializers.ListApartmentSerializer
     authentication_classes = [TokenAuthentication]
+    parser_classes = (MultiPartParser, FormParser)
 
+    @swagger_auto_schema(
+        request_body=serializers.ListApartmentSerializer,
+        operation_description="Create a new apartment with images."
+    )
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
         try:
             token = request.headers.get('Authorization')
+            clear_token = token[7:]
+
             if token is None:
                 return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
             try:
-                user = user_service.get_user(token=token)
+                user = user_service.get_user(token=clear_token)
+                verified_status = user['data']['isVerified']
+                profile_type = user['data']['profile_type']
+                isActiveHost = user['data']['isActiveHost']
                 user_id = user['data']['id']
                 user_name = user['data']['first_name'] + \
                     " " + user['data']['last_name']
-                verified_status = user['data']['isVerified']
-                profile_type = user['data']['profile_type']
 
             except Exception:
                 return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
             if not verified_status:
                 return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
-            if profile_type == 'Landlord':
-                apartment = models.Apartment.objects.create(
-                    owner_id=user_id,
-                    owner_name=user_name,
+            if not isActiveHost:
+                return Response({"status": False,  "message": "Your profile is not yet verified as a host. Please wait for host verification to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+            if profile_type == 'Host' and isActiveHost == True:
+                if serializer.is_valid():
+                    image_fields = ['image1', 'image2',
+                                    'image3', 'image4', 'image5']
+                    upload_results = []
 
-                )
-            else:
-                return Response({"status": False, "message": "You cannot list apartment because you are not a Landlord"}, status=status.HTTP_401_UNAUTHORIZED)
+                    for field in image_fields:
+                        image_file = request.data.get(field)
+                        if image_file:
+                            upload_result = cloudinary.uploader.upload(
+                                image_file)
+                            upload_results.append(upload_result['secure_url'])
+                            serializer.validated_data[field] = upload_result['secure_url']
+
+                    if upload_results:
+                        apartment = serializer.save()
+                        apartment.owner_id = user_id
+                        apartment.owner_name = user_name
+                        apartment.save()
+                        return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    else:
+                        return Response("At least one image is required.", status=status.HTTP_400_BAD_REQUEST)
+
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
             return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SaveApartmentDraftView(generics.CreateAPIView):
+    """View for listing apartment on platform"""
+    serializer_class = serializers.SaveApartmentDraftSerializer
+    authentication_classes = [TokenAuthentication]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        try:
+            token = request.headers.get('Authorization')
+            clear_token = token[7:]
+
+            if token is None:
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            try:
+                user = user_service.get_user(token=clear_token)
+                verified_status = user['data']['isVerified']
+                profile_type = user['data']['profile_type']
+                isActiveHost = user['data']['isActiveHost']
+                user_id = user['data']['id']
+                user_name = user['data']['first_name'] + \
+                    " " + user['data']['last_name']
+
+            except Exception:
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            if not verified_status:
+                return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+            if not isActiveHost:
+                return Response({"status": False,  "message": "Your profile is not yet verified as a host. Please wait for host verification to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+            if profile_type == 'Host' and isActiveHost == True:
+                if serializer.is_valid():
+                    image_fields = ['image1', 'image2',
+                                    'image3', 'image4', 'image5']
+                    upload_results = []
+
+                    for field in image_fields:
+                        image_file = request.data.get(field)
+                        if image_file:
+                            upload_result = cloudinary.uploader.upload(
+                                image_file)
+                            upload_results.append(upload_result['secure_url'])
+                            serializer.validated_data[field] = upload_result['secure_url']
+
+                    if upload_results:
+                        apartment = serializer.save()
+                        apartment.is_draft = True
+                        apartment.owner_id = user_id
+                        apartment.owner_name = user_name
+                        apartment.save()
+                        return Response({"status": True, "message": "Draft saved successfully"}, status=status.HTTP_200_OK)
+                    else:
+                        return Response("At least one image is required.", status=status.HTTP_400_BAD_REQUEST)
+
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetApartmentAmenitiesView(generics.ListAPIView):
+    serializer_class = serializers.GetApartmentAmenitiesSerializer
+    queryset = models.ApartmentAmenities.objects.all()
+    pagination_class = None
+
+
+class GetApartmentRulesView(generics.ListAPIView):
+    serializer_class = serializers.GetApartmentRulesSerializer
+    queryset = models.ApartmentRules.objects.all()
+    pagination_class = None
 
 
 class UnlistApartmentView(generics.UpdateAPIView):
@@ -76,10 +181,12 @@ class UnlistApartmentView(generics.UpdateAPIView):
 
         try:
             token = request.headers.get('Authorization')
+            clear_token = token[7:]
+
             if token is None:
                 return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
             try:
-                user = user_service.get_user(token=token)
+                user = user_service.get_user(token=clear_token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
                 profile_type = user['data']['profile_type']
@@ -105,10 +212,12 @@ class CheckoutApartmentView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             token = request.headers.get('Authorization')
+            clear_token = token[7:]
+
             if token is None:
                 return Response({"status": False, "message": "unauthenticated"})
             try:
-                user = user_service.get_user(token=token)
+                user = user_service.get_user(token=clear_token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
             except Exception:
@@ -142,12 +251,11 @@ class BookApartmentView(generics.CreateAPIView):
         if serializer.is_valid():
             try:
                 token = request.headers.get('Authorization')
-                print(token)
+                clear_token = token[7:]
                 if token is None:
                     return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
                 try:
-                    user = user_service.get_user(token=token)
-                    print(user)
+                    user = user_service.get_user(token=clear_token)
                     user_id = user['data']['id']
                     verified_status = user['data']['isVerified']
                 except Exception:
@@ -234,39 +342,6 @@ class VerifyApartmentBooking(APIView):
             return Response({"status": False, "message": "Payment not verified"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@extend_schema(methods=['PATCH'], exclude=True)
-class AddImagesToApartmentView(generics.UpdateAPIView):
-    """View for editing apartment listing"""
-    serializer_class = serializers.ApartmentImageSerializer
-
-    def patch(self, request, *args, **kwargs):
-        pass
-
-        # hobbies = request.data['hobbies']
-        # token = request.headers.get('Authorization')
-        # try:
-        #     payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        # except jwt.ExpiredSignatureError:
-        #     raise AuthenticationFailed('unauthenticated')
-        # user_id = payload['id']
-        # user = models.CustomUser.objects.filter(id=user_id).first()
-        # if user is None:
-        #     return Response({'status': False, 'message':'user not found'})
-        # print("hobbies",user.hobbies)
-        # user.hobbies.update(hobbies)
-        # user.save()
-        # serializer = serializers.UserSerializer(user)
-        # return Response({"status":True, "message":"user hobbies updated successfully","data":serializer.data})
-
-        """
-            upload images to cloudinary
-            save the links to the images on the db
-            need an API that takes in the images
-            sends images to cloudinary
-            saves the link
-        """
-
-
 class SearchApartmentView(generics.ListAPIView):
     """View for searching for apartments"""
     serializer_class = serializers.ApartmentSerializer
@@ -290,7 +365,8 @@ class SearchApartmentView(generics.ListAPIView):
 class PaginatedListApartmentView(generics.ListAPIView):
     """View for listing all apartments"""
     serializer_class = serializers.ApartmentSerializer
-    queryset = models.Apartment.objects.filter(isOccupied=False)
+    queryset = models.Apartment.objects.filter(
+        isOccupied=False, status='Listed')
 
     def get(self, request, *args, **kwargs):
         city = request.query_params.get('city', None)
@@ -386,6 +462,64 @@ class PaginatedListApartmentView(generics.ListAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class HostApartmentListView(generics.ListAPIView):
+    """This view is for showing all the hosts apartments"""
+    serializer_class = serializers.ApartmentSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        try:
+            token = request.headers.get('Authorization')
+            clear_token = token[7:]
+            if token is None:
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            try:
+                user = user_service.get_user(token=clear_token)
+                user_id = user['data']['id']
+                verified_status = user['data']['isVerified']
+
+                apartments = models.Apartment.objects.filter(
+                    owner_id=user_id)
+                qs = self.serializer_class(apartments, many=True)
+
+                maintenance_count = models.Apartment.objects.annotate(
+                    maintenance_count=Count('maintenance'))
+
+                return Response({"status": True, "message": "Data retrieved successfully", "count": len(qs.data), "data": qs.data}, status=status.HTTP_200_OK)
+
+            except Exception:
+                return Response({"status": False, "message": "unauthenticated bitch"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception:
+            return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class HostApartmentMaintenanceListView(generics.ListAPIView):
+    """This view is for showing all the hosts apartments maintenance details"""
+    serializer_class = serializers.MaintenanceSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        try:
+            token = request.headers.get('Authorization')
+            clear_token = token[7:]
+            if token is None:
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            try:
+                user = user_service.get_user(token=clear_token)
+                user_id = user['data']['id']
+
+                queryset = models.Maintenance.objects.filter(
+                    apartment_id__owner_id=user_id)
+                qs = self.serializer_class(queryset, many=True)
+
+                return Response({"status": True, "message": "Data retrieved successfully", "count": len(qs.data), "data": qs.data}, status=status.HTTP_200_OK)
+
+            except Exception:
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception:
+            return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class ApartmentDetailView(generics.RetrieveAPIView):
     """View for getting the details of one apartment"""
     serializer_class = serializers.ApartmentSerializer
@@ -412,10 +546,11 @@ class BookApartmentInspectionView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
             token = request.headers.get('Authorization')
+            clear_token = token[7:]
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token=token)
+                user = user_service.get_user(token=clear_token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
             except Exception:
@@ -513,10 +648,11 @@ class ReviewApartmentView(generics.CreateAPIView):
         if serializer.is_valid():
             try:
                 token = request.headers.get('Authorization')
+                clear_token = token[7:]
                 if token is None:
                     raise AuthenticationFailed("unauthenticated")
                 try:
-                    user = user_service.get_user(token=token)
+                    user = user_service.get_user(token=clear_token)
                     user_id = user['data']['id']
                 except Exception:
                     return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -559,8 +695,8 @@ class GetApartmentCitiesView(generics.ListAPIView):
         return Response({"status": True, "message": "Data retrieved successfully", "data": {"number_of_cities": len(cities), "cities": cities}}, status=status.HTTP_200_OK)
 
 
-class MaintainanceRequestView(generics.CreateAPIView):
-    serializer_class = serializers.MaintainanceRequestSerializer
+class MaintenanceRequestView(generics.CreateAPIView):
+    serializer_class = serializers.MaintenanceRequestSerializer
     authentication_classes = [TokenAuthentication]
 
     def post(self, request):
@@ -569,10 +705,11 @@ class MaintainanceRequestView(generics.CreateAPIView):
         if serializer.is_valid():
             # try:
             token = request.headers.get('Authorization')
+            clear_token = token[7:]
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token=token)
+                user = user_service.get_user(token=clear_token)
                 user_id = user['data']['id']
                 user_email = user['data']['email']
                 verified_status = user['data']['isVerified']
@@ -596,9 +733,6 @@ class MaintainanceRequestView(generics.CreateAPIView):
             send_maintenance_request_email(user_email, apartment.address)
             return Response({"status": True, "message": "Maintainance request sent successfully."}, status=status.HTTP_200_OK)
 
-            # except Exception:
-            #     return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
-
 
 def send_maintenance_request_email(user_email, address):
     subject = 'Apartment Maintenance Request.'
@@ -618,21 +752,23 @@ def get_user_current_apartment(user_id):
     return apartment.apartment_id
 
 
-class UserMaintainanceHistoryView(generics.ListAPIView):
-    serializer_class = serializers.MaintainanceSerializer
+class UserMaintenanceHistoryView(generics.ListAPIView):
+    serializer_class = serializers.MaintenanceSerializer
     authentication_classes = [TokenAuthentication]
 
     def get(self, request):
         try:
             token = request.headers.get('Authorization')
+            clear_token = token[7:]
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token=token)
+                user = user_service.get_user(token=clear_token)
+                print("user", user)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
             except Exception:
-                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "unauthenticated bitch"}, status=status.HTTP_401_UNAUTHORIZED)
             if not verified_status:
                 return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -650,10 +786,11 @@ class TransactionDetailsView(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         try:
             token = request.headers.get('Authorization')
+            clear_token = token[7:]
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token=token)
+                user = user_service.get_user(token=clear_token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
             except Exception:
@@ -676,10 +813,11 @@ class TransactionHistoryView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             token = request.headers.get('Authorization')
+            clear_token = token[7:]
             if token is None:
                 raise AuthenticationFailed("unauthenticated")
             try:
-                user = user_service.get_user(token=token)
+                user = user_service.get_user(token=clear_token)
                 user_id = user['data']['id']
                 verified_status = user['data']['isVerified']
             except Exception:

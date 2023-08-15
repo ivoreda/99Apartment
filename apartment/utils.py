@@ -17,7 +17,7 @@ class UserService:
         token = kwargs.get('token')
 
         headers = {
-        'Authorization': '{token}'.format(token=token),
+        'Authorization': 'Bearer {token}'.format(token=token),
         'Accept': 'application/json'
         }
 
