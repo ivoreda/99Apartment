@@ -19,7 +19,8 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'number_of_occupants', 'number_of_rooms', 'hasOccupants', 'isOccupied',
                   'price', 'apartment_fees', 'amenities', 'rules', 'images',
                   'map_url', 'apartment_type', 'tax', 'tax_price', 'rating',
-                  'number_of_reviews', 'total_price', 'created_at', 'updated_at', 'maintenance_requests']
+                  'number_of_reviews', 'total_price', 'created_at', 'updated_at', 'maintenance_requests',
+                  'cancellation_policy','has_master_bedroom','credit_renting', 'shared_housing']
 
     def get_images(self, obj):
         image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']
@@ -39,7 +40,8 @@ class ListApartmentSerializer(serializers.ModelSerializer):
         fields = ['owner_id', 'owner_name', 'name', 'description',
                   'address', 'lga', 'city', 'state',
                   'number_of_rooms', 'price', 'apartment_fees',
-                  'amenities', 'rules', 'images', 'map_url', 'apartment_type', 'is_draft']
+                  'amenities', 'rules', 'images', 'map_url', 'apartment_type', 'is_draft',
+                  'cancellation_policy','has_master_bedroom','credit_renting', 'shared_housing']
 
     def get_images(self, obj):
         image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']

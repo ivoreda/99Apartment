@@ -50,7 +50,6 @@ class Apartment(models.Model):
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     number_of_reviews = models.IntegerField(default=0)
 
-
     image1 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
     image2 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
     image3 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
@@ -59,7 +58,11 @@ class Apartment(models.Model):
 
     total_price = models.IntegerField(default=0)
     is_draft = models.BooleanField(default=False)
-    cancellation_policy = models.TextField(default="")
+    cancellation_policy = models.TextField(default="", blank=True, null=True)
+
+    has_master_bedroom = models.BooleanField(default=False)
+    credit_renting = models.BooleanField(default=False)
+    shared_housing = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
