@@ -24,7 +24,6 @@ class Apartment(models.Model):
     status = models.CharField(max_length=255, choices=APARTMENT_STATUS, default='Unlisted')
     description = models.TextField(help_text="Enter apartment description")
     address = models.TextField(help_text="Enter apartment address")
-    lga = models.CharField(max_length=50, help_text="LGA")
     city = models.CharField(max_length=50, help_text="City")
     state = models.CharField(max_length=20, help_text="State")
 
@@ -41,6 +40,7 @@ class Apartment(models.Model):
     amenities = models.JSONField(
         default=[], blank=True, null=True)
     rules = models.JSONField(default=[], blank=True, null=True)
+    safty_and_security = models.JSONField(default=[], blank=True, null=True)
 
     map_url = models.TextField(default="map url", blank=True, null=True)
     apartment_type = models.CharField(
@@ -87,21 +87,6 @@ class Apartment(models.Model):
         super(Apartment, self).save(*args, **kwargs)
 
 
-class ApartmentImage(models.Model):
-    """
-    images are uploaded to cloudinary or S3
-    and the links are saved
-    """
-    apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
-    images = models.JSONField(default={"images": []}, blank=True, null=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self) -> str:
-        return str(self.apartment_id)
-
-
 class ApartmentBooking(models.Model):
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     isPaidFor = models.BooleanField(default=False)
@@ -123,11 +108,6 @@ class ApartmentBooking(models.Model):
 
     def __str__(self) -> str:
         return self.user_id
-
-
-class UserData(models.Model):
-    """Model for extra user data that is saved on DB"""
-    pass
 
 
 class ApartmentReview(models.Model):
@@ -247,4 +227,15 @@ class ApartmentRules(models.Model):
 
     def __str__(self) -> str:
         return self.rule
+
+
+class SaftyAndSecurity(models.Model):
+    item = models.CharField(max_length=50)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.item
+
 

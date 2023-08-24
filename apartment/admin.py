@@ -5,9 +5,7 @@ from . import models
 
 
 # admin.site.register(models.Apartment)
-admin.site.register(models.ApartmentImage)
 admin.site.register(models.ApartmentReview)
-admin.site.register(models.UserData)
 admin.site.register(models.ApartmentInspection)
 
 admin.site.register(models.Maintenance)
@@ -38,3 +36,7 @@ class ApartmentAmenitiesAdmin(admin.ModelAdmin):
 @admin.register(models.ApartmentRules)
 class ApartmentRulesAdmin(admin.ModelAdmin):
     list_display = ['id', 'rule']
+
+@admin.register(models.SaftyAndSecurity)
+class SaftyAndSecutiryAdmin(admin.ModelAdmin):
+    list_display = ['id', 'item']

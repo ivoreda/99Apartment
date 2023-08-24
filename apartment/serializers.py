@@ -2,12 +2,6 @@ from rest_framework import serializers
 from . import models
 
 
-class ApartmentImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.ApartmentImage
-        fields = ['apartment_id', 'images',]
-
-
 class ApartmentSerializer(serializers.ModelSerializer):
     maintenance_requests = serializers.IntegerField(read_only=True)
     images = serializers.SerializerMethodField()
@@ -15,7 +9,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
         fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
-                  'address', 'lga', 'city', 'state',
+                  'address', 'city', 'state',
                   'number_of_occupants', 'number_of_rooms', 'hasOccupants', 'isOccupied',
                   'price', 'apartment_fees', 'amenities', 'rules', 'images',
                   'map_url', 'apartment_type', 'tax', 'tax_price', 'rating',
@@ -38,7 +32,7 @@ class ListApartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
         fields = ['owner_id', 'owner_name', 'name', 'description',
-                  'address', 'lga', 'city', 'state',
+                  'address', 'city', 'state',
                   'number_of_rooms', 'price', 'apartment_fees',
                   'amenities', 'rules', 'images', 'map_url', 'apartment_type', 'is_draft',
                   'cancellation_policy','has_master_bedroom','credit_renting', 'shared_housing']
@@ -64,6 +58,11 @@ class GetApartmentRulesSerializer(serializers.ModelSerializer):
         model = models.ApartmentRules
         fields = ['id', 'rule']
 
+class GetSaftyAndSecuritySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.SaftyAndSecurity
+        fields = ['id', 'item']
+
 
 class SaveApartmentDraftSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
@@ -71,7 +70,7 @@ class SaveApartmentDraftSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
         fields = ['owner_id', 'owner_name', 'name', 'description',
-                  'address', 'lga', 'city', 'state',
+                  'address', 'city', 'state',
                   'number_of_rooms', 'price', 'apartment_fees',
                   'amenities', 'rules', 'images', 'map_url', 'apartment_type', 'is_draft']
 

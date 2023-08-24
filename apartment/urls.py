@@ -9,9 +9,16 @@ urlpatterns = [
     path('unlist-apartment/', views.UnlistApartmentView.as_view(),
          name='unlist-apartment'),
     path('save-draft/', views.SaveApartmentDraftView.as_view(), name='save-draft'),
+
+    path('publish-draft/', views.PublishDraftApartmentView.as_view(), name='publish-draft'),
+
     path('amenities/', views.GetApartmentAmenitiesView.as_view(), name='amenities'),
     path('rules/', views.GetApartmentRulesView.as_view(), name='rules'),
-    path('edit-apartment/', views.EditApartmentView.as_view(), name='edit-apartment'),
+    path('safety-and-security/', views.GetApartmentSafetyAndSecurityItemsView.as_view(),
+         name='safety-and-security'),
+
+    path('edit-apartment/<int:id>/',
+         views.EditApartmentView.as_view(), name='edit-apartment'),
     path('all-host-apartment/', views.HostApartmentListView.as_view(),
          name='all-host-apartments'),
     path('all-host-apartment-maintenance/', views.HostApartmentMaintenanceListView.as_view(),
