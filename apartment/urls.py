@@ -10,12 +10,20 @@ urlpatterns = [
          name='unlist-apartment'),
     path('save-draft/', views.SaveApartmentDraftView.as_view(), name='save-draft'),
 
-    path('publish-draft/', views.PublishDraftApartmentView.as_view(), name='publish-draft'),
+    path('publish-draft/', views.PublishDraftApartmentView.as_view(),
+         name='publish-draft'),
 
     path('amenities/', views.GetApartmentAmenitiesView.as_view(), name='amenities'),
     path('rules/', views.GetApartmentRulesView.as_view(), name='rules'),
     path('safety-and-security/', views.GetApartmentSafetyAndSecurityItemsView.as_view(),
          name='safety-and-security'),
+
+    path('additional-charges/', views.GetApartmentAdditionalChargesView.as_view(),
+         name='additional-charges'),
+    path('cancellation-policy/', views.GetApartmentCancellationPolicyView.as_view(),
+         name='cancellation-policy'),
+
+
 
     path('edit-apartment/<int:id>/',
          views.EditApartmentView.as_view(), name='edit-apartment'),

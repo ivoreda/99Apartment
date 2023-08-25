@@ -38,5 +38,13 @@ class ApartmentRulesAdmin(admin.ModelAdmin):
     list_display = ['id', 'rule']
 
 @admin.register(models.SaftyAndSecurity)
-class SaftyAndSecutiryAdmin(admin.ModelAdmin):
+class SaftyAndSecurityAdmin(admin.ModelAdmin):
     list_display = ['id', 'item']
+
+@admin.register(models.CancellationPolicy)
+class CancellationPolicyAdmin(admin.ModelAdmin):
+    list_display = ['id', 'policy']
+
+@admin.register(models.AdditionalCharge)
+class AdditionalChargeAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'amount']

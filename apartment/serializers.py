@@ -9,12 +9,13 @@ class ApartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
         fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
-                  'address', 'city', 'state',
-                  'number_of_occupants', 'number_of_rooms', 'hasOccupants', 'isOccupied',
-                  'price', 'apartment_fees', 'amenities', 'rules', 'images',
-                  'map_url', 'apartment_type', 'tax', 'tax_price', 'rating',
-                  'number_of_reviews', 'total_price', 'created_at', 'updated_at', 'maintenance_requests',
-                  'cancellation_policy','has_master_bedroom','credit_renting', 'shared_housing']
+                  'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms',
+                  'number_of_bathrooms', 'number_of_toilets', 'hasOccupants', 'isOccupied',
+                  'price', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
+                  'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'tax',
+                  'tax_price', 'rating', 'number_of_reviews', 'total_price', 'is_draft',
+                  'images', 'maintenance_requests', 'has_master_bedroom', 'credit_renting',
+                  'shared_housing', 'created_at', 'updated_at',]
 
     def get_images(self, obj):
         image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']
@@ -31,11 +32,13 @@ class ListApartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Apartment
-        fields = ['owner_id', 'owner_name', 'name', 'description',
-                  'address', 'city', 'state',
-                  'number_of_rooms', 'price', 'apartment_fees',
-                  'amenities', 'rules', 'images', 'map_url', 'apartment_type', 'is_draft',
-                  'cancellation_policy','has_master_bedroom','credit_renting', 'shared_housing']
+        fields = ['name', 'status', 'description',
+                  'address', 'city', 'state', 'number_of_rooms',
+                  'number_of_bathrooms', 'number_of_toilets',
+                  'price', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
+                  'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
+                  'images', 'has_master_bedroom', 'credit_renting',
+                  'shared_housing']
 
     def get_images(self, obj):
         image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']
@@ -58,10 +61,23 @@ class GetApartmentRulesSerializer(serializers.ModelSerializer):
         model = models.ApartmentRules
         fields = ['id', 'rule']
 
+
 class GetSaftyAndSecuritySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.SaftyAndSecurity
         fields = ['id', 'item']
+
+
+class GetAdditionalChargesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.AdditionalCharge
+        fields = ['id', 'name', 'amount']
+
+
+class GetCancellationPolicySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.CancellationPolicy
+        fields = ['id', 'policy']
 
 
 class SaveApartmentDraftSerializer(serializers.ModelSerializer):

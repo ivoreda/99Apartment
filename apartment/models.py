@@ -7,9 +7,6 @@ from cloudinary.models import CloudinaryField
 class Apartment(models.Model):
     """Model for Apartment"""
 
-    APARTMENT_TYPE = (('Shared Housing', 'Shared Housing'),
-                      ('Credit Renting', 'Credit Renting'),)
-
     LEASE_TYPE = (('Short Lease', 'Short Lease'),
                   ('Long Lease', 'Long Lease'))
 
@@ -31,7 +28,6 @@ class Apartment(models.Model):
     number_of_rooms = models.IntegerField(default=0)
     number_of_bathrooms = models.IntegerField(default=0)
     number_of_toilets = models.IntegerField(default=0)
-    type_of_space = models.CharField(default='One Bedroom', max_length=40)
     hasOccupants = models.BooleanField(default=False)
     isOccupied = models.BooleanField(default=False)
     price = models.IntegerField(default=0)
@@ -41,10 +37,13 @@ class Apartment(models.Model):
         default=[], blank=True, null=True)
     rules = models.JSONField(default=[], blank=True, null=True)
     safty_and_security = models.JSONField(default=[], blank=True, null=True)
+    cancellation_policy = models.JSONField(default=[], blank=True, null=True)
+    point_of_interest = models.TextField(default='')
+
 
     map_url = models.TextField(default="map url", blank=True, null=True)
-    apartment_type = models.CharField(
-        choices=APARTMENT_TYPE, default='Shared Housing', blank=True, null=True, max_length=255)
+    apartment_type = models.CharField(default='', max_length=255)
+    lease_type = models.CharField(default='Short Lease', choices=LEASE_TYPE)
     tax = models.DecimalField(default=7.5, decimal_places=1, max_digits=10)
     tax_price = models.DecimalField(default=0, decimal_places=1, max_digits=10)
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
@@ -58,7 +57,6 @@ class Apartment(models.Model):
 
     total_price = models.IntegerField(default=0)
     is_draft = models.BooleanField(default=False)
-    cancellation_policy = models.TextField(default="", blank=True, null=True)
 
     has_master_bedroom = models.BooleanField(default=False)
     credit_renting = models.BooleanField(default=False)
@@ -210,7 +208,7 @@ class Maintenance(models.Model):
 
 
 class ApartmentAmenities(models.Model):
-    amenity = models.CharField(max_length=50)
+    amenity = models.CharField(max_length=500)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -220,7 +218,7 @@ class ApartmentAmenities(models.Model):
 
 
 class ApartmentRules(models.Model):
-    rule = models.CharField(max_length=50)
+    rule = models.CharField(max_length=500)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -230,7 +228,7 @@ class ApartmentRules(models.Model):
 
 
 class SaftyAndSecurity(models.Model):
-    item = models.CharField(max_length=50)
+    item = models.CharField(max_length=500)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -238,4 +236,26 @@ class SaftyAndSecurity(models.Model):
     def __str__(self) -> str:
         return self.item
 
+
+
+class CancellationPolicy(models.Model):
+    policy = models.CharField(max_length=500)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.policy
+
+
+class AdditionalCharge(models.Model):
+    name = models.CharField(max_length=500)
+    amount = models.IntegerField(default=0)
+
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.name
 

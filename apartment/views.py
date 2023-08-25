@@ -77,6 +77,8 @@ class ListApartmentView(generics.CreateAPIView):
                         return Response("At least one image is required.", status=status.HTTP_400_BAD_REQUEST)
 
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"status": False,  "message": "You are not authorized to make this request"}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception:
             return Response({"status": False, "message": "Cannot get Auth token"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -315,6 +317,17 @@ class GetApartmentSafetyAndSecurityItemsView(generics.ListAPIView):
 class GetApartmentRulesView(generics.ListAPIView):
     serializer_class = serializers.GetApartmentRulesSerializer
     queryset = models.ApartmentRules.objects.all()
+    pagination_class = None
+
+class GetApartmentAdditionalChargesView(generics.ListAPIView):
+    serializer_class = serializers.GetAdditionalChargesSerializer
+    queryset = models.AdditionalCharge.objects.all()
+    pagination_class = None
+
+
+class GetApartmentCancellationPolicyView(generics.ListAPIView):
+    serializer_class = serializers.GetCancellationPolicySerializer
+    queryset = models.CancellationPolicy.objects.all()
     pagination_class = None
 
 
