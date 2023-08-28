@@ -596,7 +596,7 @@ class PaginatedListApartmentView(generics.ListAPIView):
 
 class HostApartmentListView(generics.ListAPIView):
     """This view is for showing all the hosts apartments"""
-    serializer_class = serializers.ApartmentSerializer
+    serializer_class = serializers.HostApartmentSerializer
     authentication_classes = [TokenAuthentication]
 
     def get(self, request):
