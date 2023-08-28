@@ -667,8 +667,13 @@ class ApartmentDetailView(generics.RetrieveAPIView):
             apartment_id = self.kwargs.get('id')
             apartment = models.Apartment.objects.filter(
                 id=apartment_id).first()
-            serializer = self.serializer_class(apartment)
-            return Response({"status": True, "message": "Apartment retrieved successfully", "data": serializer.data}, status=status.HTTP_200_OK)
+            if apartment:
+                if apartment.status == 'Unlisted':
+                    return Response({"status": False, "message": "This apartment is not yet listed"}, status=status.HTTP_400_BAD_REQUEST)
+                serializer = self.serializer_class(apartment)
+                return Response({"status": True, "message": "Apartment retrieved successfully", "data": serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({"status": False, "message": "Apartment not found"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
             return Response({"status": False, "message": "server error"}, status=status.HTTP_400_BAD_REQUEST)
 
