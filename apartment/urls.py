@@ -1,39 +1,56 @@
 from django.urls import path
 from . import views
 
-urlpatterns = [
-    # For Hosts
+
+host_urls = [
     path('list-apartment/', views.ListApartmentView.as_view(), name='list-apartment'),
+
     path('delete-apartment/<int:id>/',
          views.DeleteApartmentView.as_view(), name='delete-apartment'),
+
     path('unlist-apartment/', views.UnlistApartmentView.as_view(),
          name='unlist-apartment'),
+
     path('save-draft/', views.SaveApartmentDraftView.as_view(), name='save-draft'),
 
     path('publish-draft/', views.PublishDraftApartmentView.as_view(),
          name='publish-draft'),
 
     path('amenities/', views.GetApartmentAmenitiesView.as_view(), name='amenities'),
+
     path('rules/', views.GetApartmentRulesView.as_view(), name='rules'),
+
     path('safety-and-security/', views.GetApartmentSafetyAndSecurityItemsView.as_view(),
          name='safety-and-security'),
 
     path('additional-charges/', views.GetApartmentAdditionalChargesView.as_view(),
          name='additional-charges'),
+
     path('cancellation-policy/', views.GetApartmentCancellationPolicyView.as_view(),
          name='cancellation-policy'),
 
-
-
     path('edit-apartment/<int:id>/',
          views.EditApartmentView.as_view(), name='edit-apartment'),
+
     path('all-host-apartment/', views.HostApartmentListView.as_view(),
          name='all-host-apartments'),
+
     path('all-host-apartment-maintenance/', views.HostApartmentMaintenanceListView.as_view(),
          name='all-host-apartment-maintenance'),
 
+    path('services/', views.GetAllServicesView.as_view(), name='services'),
 
-    # For Guests
+    path('host-analytics', views.HostAnalyticsView.as_view(),
+         name='host-analytics'),
+
+    path('host-analytics-dummy', views.HostAnalyticsDummyView.as_view(),
+         name='host-analytics'),
+
+
+
+]
+
+guest_urls = [
     path('book/', views.BookApartmentView.as_view(), name='book'),
     path('verify-booking/<str:reference>', views.VerifyApartmentBooking.as_view(),
          name='verify-booking'),
@@ -44,8 +61,6 @@ urlpatterns = [
     path('<int:id>/', views.ApartmentDetailView.as_view(), name='apartment-detail'),
     path('', views.PaginatedListApartmentView.as_view(), name='all-apartment'),
     #     path('search-for-apartments/', views.SearchApartmentView.as_view(), name='search-for-apartment'),
-
-
     path('apartment-inpection/', views.GetApartmentInspectionView.as_view(),
          name='apartment-inpection'),
 
@@ -67,5 +82,7 @@ urlpatterns = [
     path('user/transactions/', views.TransactionHistoryView.as_view(),
          name='user-transaction-history'),
 
-
 ]
+
+
+urlpatterns = host_urls + guest_urls

@@ -1,3 +1,5 @@
+from django.db.models.functions import ExtractMonth, ExtractYear
+from django.db.models import Count, Sum, F, ExpressionWrapper, FloatField
 from rest_framework import generics
 from rest_framework.views import APIView
 from django.db.models import Count
@@ -319,6 +321,7 @@ class GetApartmentRulesView(generics.ListAPIView):
     queryset = models.ApartmentRules.objects.all()
     pagination_class = None
 
+
 class GetApartmentAdditionalChargesView(generics.ListAPIView):
     serializer_class = serializers.GetAdditionalChargesSerializer
     queryset = models.AdditionalCharge.objects.all()
@@ -422,7 +425,7 @@ class BookApartmentView(generics.CreateAPIView):
                     last_name=user['data']['last_name'],
                     phone_number=user['data']['phone_number'],
                     no_of_guests=request.data['no_of_guests'],
-                    cover_photo=apartment.images[0]
+                    cover_photo=apartment.image1
                 )
 
                 send_apartment_booking_email(
@@ -611,8 +614,13 @@ class HostApartmentListView(generics.ListAPIView):
                     owner_id=user_id)
                 qs = self.serializer_class(apartments, many=True)
 
-                maintenance_count = models.Apartment.objects.annotate(
-                    maintenance_count=Count('maintenance'))
+                annotated_apartments = apartments.annotate(
+                    maintenance_count=Count('maintenance'), occupancy_rate=ExpressionWrapper(
+                        F('number_of_occupants') * 100 / F('number_of_rooms'),
+                        output_field=FloatField()
+                    ), amount_generated=Sum('apartmentbooking__amount_paid')
+                )
+                qs = self.serializer_class(annotated_apartments, many=True)
 
                 return Response({"status": True, "message": "Data retrieved successfully", "count": len(qs.data), "data": qs.data}, status=status.HTTP_200_OK)
 
@@ -963,5 +971,107 @@ class TransactionHistoryView(generics.ListAPIView):
             queryset = models.Transaction.objects.filter(user_id=user_id)
             qs = self.serializer_class(queryset, many=True)
             return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data}, status=status.HTTP_200_OK)
+        except Exception:
+            return Response({"status": False, "message": "Cannot get Auth token"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class HostAnalyticsView(APIView):
+    def get(self, request):
+        try:
+            token = request.headers.get('Authorization')
+            clear_token = token[7:]
+            if token is None:
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            try:
+                user = user_service.get_user(token=clear_token)
+                user_id = user['data']['id']
+                verified_status = user['data']['isVerified']
+
+                maintenance_queryset = models.Maintenance.objects.filter(
+                    apartment_id__owner_id=user_id)
+                maintenance_qs = serializers.MaintenanceSerializer(
+                    maintenance_queryset, many=True)
+
+                service_queryset = models.Service.objects.filter(
+                    apartment_id__owner_id=user_id)
+
+                service_qs = serializers.ServiceSerializer(
+                    service_queryset, many=True)
+
+                apartments = models.Apartment.objects.filter(owner_id=user_id)
+
+                total_occupants = apartments.aggregate(total_occupants=Sum('number_of_occupants'))[
+                    'total_occupants'] or 0
+
+                total_revenue = apartments.aggregate(total_revenue=Sum('apartmentbooking__amount_paid'))[
+                    'total_revenue'] or 0
+
+                total_service_amount = service_queryset.aggregate(total_amount=Sum('amount'))[
+                    'total_amount'] or 0
+
+                analytics_data = {"maintenance_count": len(maintenance_qs.data),
+                                  "service_count": len(service_qs.data),
+                                  "total_occupants": total_occupants,
+                                  "total_revenue": total_revenue,
+                                  "total_profit": total_revenue - total_service_amount,
+                                  "total_service_amount": total_service_amount,
+                                  "total_apartments": len(apartments)}
+
+                return Response({"status": True, "message": "Data retrieved successfully", "data": analytics_data}, status=status.HTTP_200_OK)
+
+            except Exception:
+                return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        except Exception:
+            return Response({"status": False, "message": "Cannot get Auth token"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class HostAnalyticsDummyView(APIView):
+    def get(self, request):
+        return Response({"status": True, "message": "Data retrieved successfully", "data": {
+            "january": 4000,
+            "february": 2000,
+            "march": 6000,
+            "april": 4000,
+            "may": 10000,
+            "june": 14000,
+            "july": 3000,
+            "august": 9000,
+            "september": 7000,
+            "october": 7500,
+            "november": 6900,
+            "december": 8000
+        }})
+
+
+class GetAllServicesView(generics.ListAPIView):
+    """This view is for showing all the hosts apartments"""
+    serializer_class = serializers.ServiceSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        try:
+            token = request.headers.get('Authorization')
+            clear_token = token[7:]
+            if token is None:
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            try:
+                user = user_service.get_user(token=clear_token)
+                user_id = user['data']['id']
+                verified_status = user['data']['isVerified']
+
+                services = models.Service.objects.filter(
+                    apartment_id__owner_id=user_id)
+
+                total_amount = services.aggregate(total_amount=Sum('amount'))[
+                    'total_amount'] or 0
+
+                qs = self.serializer_class(services, many=True)
+
+                return Response({"status": True, "message": "Data retrieved successfully", "count": len(qs.data), "total_amount": total_amount, "data": qs.data}, status=status.HTTP_200_OK)
+
+            except Exception:
+                return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
+
         except Exception:
             return Response({"status": False, "message": "Cannot get Auth token"}, status=status.HTTP_400_BAD_REQUEST)

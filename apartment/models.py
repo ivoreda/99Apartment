@@ -13,12 +13,17 @@ class Apartment(models.Model):
     APARTMENT_STATUS = (('Listed', 'Listed'),
                         ('Unlisted', 'Unlisted'),)
 
+    APARTMENT_VERIFICATION_STATUS = (('Pending', 'Pending'),
+                                     ('Unverified', 'Unverified'),
+                                     ('Verified', 'Verified'),)
+
     owner_id = models.CharField(
         max_length=255, help_text='Apartment owner ID', default='owner ID')
     owner_name = models.CharField(
         max_length=255, help_text='Apartment owner name', default='owner name')
     name = models.CharField(max_length=255, help_text="Apartment name")
-    status = models.CharField(max_length=255, choices=APARTMENT_STATUS, default='Unlisted')
+    status = models.CharField(
+        max_length=255, choices=APARTMENT_STATUS, default='Unlisted')
     description = models.TextField(help_text="Enter apartment description")
     address = models.TextField(help_text="Enter apartment address")
     city = models.CharField(max_length=50, help_text="City")
@@ -30,6 +35,7 @@ class Apartment(models.Model):
     number_of_toilets = models.IntegerField(default=0)
     hasOccupants = models.BooleanField(default=False)
     isOccupied = models.BooleanField(default=False)
+    _occupancy_rate = models.FloatField(default=0.0)
     price = models.IntegerField(default=0)
 
     apartment_fees = models.JSONField(default=dict, blank=True, null=True)
@@ -40,7 +46,6 @@ class Apartment(models.Model):
     cancellation_policy = models.JSONField(default=[], blank=True, null=True)
     point_of_interest = models.TextField(default='')
 
-
     map_url = models.TextField(default="map url", blank=True, null=True)
     apartment_type = models.CharField(default='', max_length=255)
     lease_type = models.CharField(default='Short Lease', choices=LEASE_TYPE)
@@ -49,14 +54,22 @@ class Apartment(models.Model):
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     number_of_reviews = models.IntegerField(default=0)
 
-    image1 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
-    image2 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
-    image3 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
-    image4 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
-    image5 = models.ImageField(upload_to='apartment-images/', blank=True, null=True)
+    image1 = models.ImageField(
+        upload_to='apartment-images/', blank=True, null=True)
+    image2 = models.ImageField(
+        upload_to='apartment-images/', blank=True, null=True)
+    image3 = models.ImageField(
+        upload_to='apartment-images/', blank=True, null=True)
+    image4 = models.ImageField(
+        upload_to='apartment-images/', blank=True, null=True)
+    image5 = models.ImageField(
+        upload_to='apartment-images/', blank=True, null=True)
 
     total_price = models.IntegerField(default=0)
     is_draft = models.BooleanField(default=False)
+
+    verification_status = models.CharField(
+        choices=APARTMENT_VERIFICATION_STATUS, default='Unverified')
 
     has_master_bedroom = models.BooleanField(default=False)
     credit_renting = models.BooleanField(default=False)
@@ -67,6 +80,27 @@ class Apartment(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def calculate_occupancy_rate(self):
+        # Calculate the occupancy rate based on your criteria
+        # For example, you can count the number of occupied units and divide by the total number of units.
+        total_units = self.number_of_rooms  # Replace with your actual field name
+        occupied_units = self.number_of_occupants  # Replace with your actual field name
+        if total_units == 0:
+            return 0  # Avoid division by zero
+        return (occupied_units / total_units) * 100
+
+    # Define a property for occupancy_rate
+    @property
+    def occupancy_rate(self):
+        return self.calculate_occupancy_rate()
+
+    @occupancy_rate.setter
+    def occupancy_rate(self, value):
+        # You can add custom logic here if you want to set the occupancy rate
+        # For example, you might want to update other fields based on the rate.
+        # For this example, we'll just set the rate directly.
+        self._occupancy_rate = value
 
     def save(self, *args, **kwargs):
         if self.number_of_rooms == self.number_of_occupants:
@@ -178,6 +212,10 @@ class Maintenance(models.Model):
     MAINTENANCE_STATUS = (('Pending', 'Pending'),
                           ('Done', 'Done'),)
 
+    PRIORITY_LEVEL = (('Low', 'Low'),
+                      ('Medium', 'MEdium'),
+                      ('High', 'High'))
+
     user_id = models.CharField(max_length=10)
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -188,6 +226,7 @@ class Maintenance(models.Model):
         choices=MAINTENANCE_TYPE, max_length=20, default='Structural')
     status = models.CharField(
         choices=MAINTENANCE_STATUS, max_length=20, default='Pending')
+    priority = models.CharField(choices=PRIORITY_LEVEL, default='Low')
     description = models.TextField()
     cost = models.IntegerField(default=0)
     date_of_complaint = models.DateField(auto_now_add=True)
@@ -200,9 +239,22 @@ class Maintenance(models.Model):
         return f"maintainance request from '{self.name}'"
 
 
-# class Service(models.Model):
-#     SERVICE_PAYMENT_STATUS = (('Pending', 'Pending'),
-#                           ('Paid', 'Paid'),)
+class Service(models.Model):
+    SERVICE_PAYMENT_STATUS = (('Pending', 'Pending'),
+                          ('Paid', 'Paid'),)
+
+    apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
+    transaction_date = models.DateField(auto_now_add=True)
+    transaction_time= models.TimeField(auto_now_add=True)
+    expense = models.CharField(max_length=255)
+    status = models.CharField(choices=SERVICE_PAYMENT_STATUS, default='Pending')
+    amount = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.expense
 
 
 
@@ -237,7 +289,6 @@ class SaftyAndSecurity(models.Model):
         return self.item
 
 
-
 class CancellationPolicy(models.Model):
     policy = models.CharField(max_length=500)
 
@@ -252,10 +303,8 @@ class AdditionalCharge(models.Model):
     name = models.CharField(max_length=500)
     amount = models.IntegerField(default=0)
 
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.name
-

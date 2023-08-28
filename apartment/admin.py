@@ -11,7 +11,6 @@ admin.site.register(models.ApartmentInspection)
 admin.site.register(models.Maintenance)
 
 
-
 @admin.register(models.ApartmentBooking)
 class ApartmentBookingAdmin(admin.ModelAdmin):
     list_display = ['id', 'apartment_id', 'isPaidFor',
@@ -20,7 +19,7 @@ class ApartmentBookingAdmin(admin.ModelAdmin):
 
 @admin.register(models.Apartment)
 class ApartmentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'city', 'is_draft', 'number_of_occupants', 'hasOccupants', 'isOccupied',
+    list_display = ['id', 'name', 'city', 'is_draft', 'number_of_occupants', 'hasOccupants', 'isOccupied',
                     'rating',]
 
 
@@ -29,22 +28,32 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = ['user_id', 'amount', 'transaction_status',
                     'payment_reference', 'created_at', 'updated_at',]
 
+
 @admin.register(models.ApartmentAmenities)
 class ApartmentAmenitiesAdmin(admin.ModelAdmin):
     list_display = ['id', 'amenity']
+
 
 @admin.register(models.ApartmentRules)
 class ApartmentRulesAdmin(admin.ModelAdmin):
     list_display = ['id', 'rule']
 
+
 @admin.register(models.SaftyAndSecurity)
 class SaftyAndSecurityAdmin(admin.ModelAdmin):
     list_display = ['id', 'item']
+
 
 @admin.register(models.CancellationPolicy)
 class CancellationPolicyAdmin(admin.ModelAdmin):
     list_display = ['id', 'policy']
 
+
 @admin.register(models.AdditionalCharge)
 class AdditionalChargeAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'amount']
+
+
+@admin.register(models.Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = ['id', 'expense', 'status', 'amount']

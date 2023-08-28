@@ -5,6 +5,10 @@ from . import models
 class ApartmentSerializer(serializers.ModelSerializer):
     maintenance_requests = serializers.IntegerField(read_only=True)
     images = serializers.SerializerMethodField()
+    maintenance_count = serializers.IntegerField()
+    occupancy_rate = serializers.FloatField()
+    amount_generated = serializers.DecimalField(
+        max_digits=10, decimal_places=2)  # Add this line
 
     class Meta:
         model = models.Apartment
@@ -14,8 +18,9 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'price', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
                   'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'tax',
                   'tax_price', 'rating', 'number_of_reviews', 'total_price', 'is_draft',
-                  'images', 'maintenance_requests', 'has_master_bedroom', 'credit_renting',
-                  'shared_housing', 'created_at', 'updated_at',]
+                  'verification_status', 'images', 'maintenance_requests', 'has_master_bedroom',
+                  'credit_renting', 'shared_housing', 'created_at', 'updated_at',
+                  'maintenance_count', 'occupancy_rate', 'amount_generated',]
 
     def get_images(self, obj):
         image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']
@@ -204,3 +209,9 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Transaction
         fields = ("__all__")
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Service
+        fields = '__all__'
