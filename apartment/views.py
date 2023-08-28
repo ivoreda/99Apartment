@@ -976,6 +976,8 @@ class TransactionHistoryView(generics.ListAPIView):
 
 
 class HostAnalyticsView(APIView):
+    authentication_classes = [TokenAuthentication]
+
     def get(self, request):
         try:
             token = request.headers.get('Authorization')
@@ -1028,7 +1030,7 @@ class HostAnalyticsView(APIView):
 
 class HostAnalyticsDummyView(APIView):
     def get(self, request):
-        return Response({"status": True, "message": "Data retrieved successfully", "data": {
+        return Response({"status": True, "message": "Data retrieved successfully", "data": {"revenue": {
             "january": 4000,
             "february": 2000,
             "march": 6000,
@@ -1041,7 +1043,21 @@ class HostAnalyticsDummyView(APIView):
             "october": 7500,
             "november": 6900,
             "december": 8000
-        }})
+        },
+            "maintenance": {
+            "january": 4000,
+            "february": 2000,
+            "march": 6000,
+            "april": 4000,
+            "may": 10000,
+            "june": 14000,
+            "july": 3000,
+            "august": 9000,
+            "september": 7000,
+            "october": 7500,
+            "november": 6900,
+            "december": 8000
+        }}})
 
 
 class GetAllServicesView(generics.ListAPIView):
