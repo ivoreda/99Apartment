@@ -113,10 +113,13 @@ class SaveApartmentDraftSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Apartment
-        fields = ['owner_id', 'owner_name', 'name', 'description',
-                  'address', 'city', 'state',
-                  'number_of_rooms', 'price', 'apartment_fees',
-                  'amenities', 'rules', 'images', 'map_url', 'apartment_type', 'is_draft']
+        fields = ['name', 'status', 'description',
+                  'address', 'city', 'state', 'number_of_rooms',
+                  'number_of_bathrooms', 'number_of_toilets',
+                  'price', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
+                  'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
+                  'images', 'has_master_bedroom', 'credit_renting',
+                  'shared_housing']
 
     def get_images(self, obj):
         image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']
