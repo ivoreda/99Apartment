@@ -605,7 +605,7 @@ class HostApartmentListView(generics.ListAPIView):
         qs = self.serializer_class(apartments, many=True)
         annotated_apartments = apartments.annotate(
             maintenance_count=Count('maintenance'), occupancy_rate=ExpressionWrapper(
-                F('number_of_occupants') * 100 / F('number_of_rooms'),
+                F('number_of_occupants') * 100 / (F('number_of_rooms') + 1),
                 output_field=FloatField()
             ), amount_generated=Sum('apartmentbooking__amount_paid')
         )
