@@ -845,7 +845,7 @@ class MaintenanceRequestView(generics.CreateAPIView):
                 return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
 
             apartment = get_user_current_apartment(user_id)
-            maintenance_request = models.Maintainance.objects.create(
+            maintenance_request = models.Maintenance.objects.create(
                 apartment_id=apartment,
                 user_id=user_id,
                 name=serializer.data.get('name'),
@@ -857,7 +857,7 @@ class MaintenanceRequestView(generics.CreateAPIView):
             )
 
             send_maintenance_request_email(user_email, apartment.address)
-            return Response({"status": True, "message": "Maintainance request sent successfully."}, status=status.HTTP_200_OK)
+            return Response({"status": True, "message": "Maintenance request sent successfully."}, status=status.HTTP_200_OK)
 
 
 def send_maintenance_request_email(user_email, address):
@@ -901,7 +901,7 @@ class UserMaintenanceHistoryView(generics.ListAPIView):
         if not verified_status:
             return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        queryset = models.Maintainance.objects.filter(user_id=user_id)
+        queryset = models.Maintenance.objects.filter(user_id=user_id)
         qs = self.serializer_class(queryset, many=True)
         return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data}, status=status.HTTP_200_OK)
 

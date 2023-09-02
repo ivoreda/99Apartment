@@ -72,10 +72,10 @@ guest_urls = [
     path('reviews/<int:apartment_id>/',
          views.ApartmentReviewsListView.as_view(), name='apartment-reviews'),
 
-    path('maintainance-request/', views.MaintenanceRequestView.as_view(),
-         name='maintainance-request'),
-    path('user/maintainance-history/', views.UserMaintenanceHistoryView.as_view(),
-         name='user-maintainance-history'),
+    path('maintenance-request/', views.MaintenanceRequestView.as_view(),
+         name='maintenance-request'),
+    path('user/maintenance-history/', views.UserMaintenanceHistoryView.as_view(),
+         name='user-maintenance-history'),
 
     path('transaction-details/<int:id>',
          views.TransactionDetailsView.as_view(), name='transaction-details'),

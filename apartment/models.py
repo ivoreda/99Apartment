@@ -176,7 +176,7 @@ class ApartmentInspection(models.Model):
 class Transaction(models.Model):
 
     TRANSACTION_TYPE = (('Annual Rent', 'Annual Rent'),
-                        ('Maintainance', 'Maintainance'),)
+                        ('Maintenance', 'Maintenance'),)
 
     TRANSACTION_STATUS = (('Pending', 'Pending'),
                           ('Done', 'Done'),)
@@ -236,7 +236,7 @@ class Maintenance(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"maintainance request from '{self.name}'"
+        return f"Maintenance request from '{self.name}'"
 
 
 class Service(models.Model):
