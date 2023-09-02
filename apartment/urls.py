@@ -13,7 +13,7 @@ host_urls = [
 
     path('save-draft/', views.SaveApartmentDraftView.as_view(), name='save-draft'),
 
-    path('publish-draft/', views.PublishDraftApartmentView.as_view(),
+    path('publish-draft/<int:id>/', views.PublishDraftApartmentView.as_view(),
          name='publish-draft'),
 
     path('amenities/', views.GetApartmentAmenitiesView.as_view(), name='amenities'),
