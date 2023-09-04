@@ -22,7 +22,10 @@ class ApartmentSerializer(serializers.ModelSerializer):
         for field in image_fields:
             image = getattr(obj, field)
             if image:
-                images[field] = image.url
+                # Extract the Cloudinary URL from the nested URL
+                parts = image.url.split("/media/")
+                if len(parts) == 2:
+                    images[field] = parts[1]
         return images
 
 
@@ -33,6 +36,7 @@ class HostApartmentSerializer(serializers.ModelSerializer):
     occupancy_rate = serializers.FloatField()
     amount_generated = serializers.DecimalField(
         max_digits=10, decimal_places=2)
+
     class Meta:
         model = models.Apartment
         fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
@@ -51,7 +55,10 @@ class HostApartmentSerializer(serializers.ModelSerializer):
         for field in image_fields:
             image = getattr(obj, field)
             if image:
-                images[field] = image.url
+                # Extract the Cloudinary URL from the nested URL
+                parts = image.url.split("/media/")
+                if len(parts) == 2:
+                    images[field] = parts[1]
         return images
 
 
@@ -74,7 +81,10 @@ class ListApartmentSerializer(serializers.ModelSerializer):
         for field in image_fields:
             image = getattr(obj, field)
             if image:
-                images[field] = image.url
+                # Extract the Cloudinary URL from the nested URL
+                parts = image.url.split("/media/")
+                if len(parts) == 2:
+                    images[field] = parts[1]
         return images
 
 
@@ -127,7 +137,10 @@ class SaveApartmentDraftSerializer(serializers.ModelSerializer):
         for field in image_fields:
             image = getattr(obj, field)
             if image:
-                images[field] = image.url
+                # Extract the Cloudinary URL from the nested URL
+                parts = image.url.split("/media/")
+                if len(parts) == 2:
+                    images[field] = parts[1]
         return images
 
 

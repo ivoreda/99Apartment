@@ -602,6 +602,7 @@ class HostApartmentListView(generics.ListAPIView):
             return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
         apartments = models.Apartment.objects.filter(
             owner_id=user_id)
+
         qs = self.serializer_class(apartments, many=True)
         annotated_apartments = apartments.annotate(
             maintenance_count=Count('maintenance'), occupancy_rate=ExpressionWrapper(
