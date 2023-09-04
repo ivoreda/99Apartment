@@ -75,6 +75,7 @@ class ListApartmentView(generics.CreateAPIView):
                     apartment = serializer.save()
                     apartment.owner_id = user_id
                     apartment.owner_name = user_name
+                    apartment.is_draft = False
                     apartment.save()
                     return Response({"status": False,  "message": "Apartment added successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
                 else:
@@ -165,6 +166,7 @@ class PublishDraftApartmentView(APIView):
         if int(apartment.owner_id) == user_id:
             apartment.is_draft = False
             apartment.save()
+            return Response({"status": True, "message": "Apartment is no longer a draft"}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             return Response({"status": False, "message": "You are not the owner of this property"}, status=status.HTTP_401_UNAUTHORIZED)
 
