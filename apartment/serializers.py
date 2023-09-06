@@ -239,8 +239,7 @@ class MaintenanceSerializer(serializers.ModelSerializer):
 class MaintenanceRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Maintenance
-        fields = ['name', 'phone_number',
-                  'maintenance_category', 'maintenance_type',
+        fields = ['maintenance_category', 'maintenance_type',
                   'description',]
 
 

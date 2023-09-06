@@ -874,6 +874,7 @@ class MaintenanceRequestView(generics.CreateAPIView):
                 user_id = user['data']['id']
                 user_email = user['data']['email']
                 verified_status = user['data']['isVerified']
+                user_full_name = user['data']['first_name'] + " " + user['data']['last_name']
             except Exception:
                 return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
             if not verified_status:
@@ -883,8 +884,8 @@ class MaintenanceRequestView(generics.CreateAPIView):
             maintenance_request = models.Maintenance.objects.create(
                 apartment_id=apartment,
                 user_id=user_id,
-                name=serializer.data.get('name'),
-                phone_number=serializer.data.get('phone_number'),
+                name=user_full_name,
+                phone_number=user['data']['phone_number'],
                 maintenance_category=serializer.data.get(
                     'maintenance_category'),
                 maintenance_type=serializer.data.get('maintenance_type'),
