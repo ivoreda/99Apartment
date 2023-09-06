@@ -243,6 +243,20 @@ class MaintenanceRequestSerializer(serializers.ModelSerializer):
                   'description',]
 
 
+class HostMaintenanceSerializer(serializers.ModelSerializer):
+    apartment_detail = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Maintenance
+        fields = ['apartment_detail', 'user_id', 'name', 'phone_number',
+                  'apartment_id', 'maintenance_category', 'maintenance_type',
+                  'status', 'description', 'cost',
+                  'date_of_complaint', 'time_of_complaint',]
+
+    def get_apartment_detail(self, obj):
+        return obj.apartment_id.name
+
+
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Transaction

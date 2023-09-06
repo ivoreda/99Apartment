@@ -204,16 +204,18 @@ class Transaction(models.Model):
 class Maintenance(models.Model):
 
     MAINTENANCE_TYPE = (('Electrical', 'Electrical'),
-                        ('Structural', 'Structural'),)
+                        ('Structural', 'Structural'),
+                        ('Plumbing', 'Plumbing'),)
 
     MAINTENANCE_CATEGORY = (('Routine', 'Routine'),
                             ('Emergency', 'Emergency'),)
 
     MAINTENANCE_STATUS = (('Pending', 'Pending'),
+                          ('In Progress', 'In Progress'),
                           ('Done', 'Done'),)
 
     PRIORITY_LEVEL = (('Low', 'Low'),
-                      ('Medium', 'MEdium'),
+                      ('Medium', 'Medium'),
                       ('High', 'High'))
 
     user_id = models.CharField(max_length=10)
@@ -241,13 +243,14 @@ class Maintenance(models.Model):
 
 class Service(models.Model):
     SERVICE_PAYMENT_STATUS = (('Pending', 'Pending'),
-                          ('Paid', 'Paid'),)
+                              ('Paid', 'Paid'),)
 
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     transaction_date = models.DateField(auto_now_add=True)
-    transaction_time= models.TimeField(auto_now_add=True)
+    transaction_time = models.TimeField(auto_now_add=True)
     expense = models.CharField(max_length=255)
-    status = models.CharField(choices=SERVICE_PAYMENT_STATUS, default='Pending')
+    status = models.CharField(
+        choices=SERVICE_PAYMENT_STATUS, default='Pending')
     amount = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -255,8 +258,6 @@ class Service(models.Model):
 
     def __str__(self) -> str:
         return self.expense
-
-
 
 
 class ApartmentAmenities(models.Model):

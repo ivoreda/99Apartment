@@ -651,7 +651,7 @@ class HostApartmentByIdView(generics.RetrieveAPIView):
 
 class HostApartmentMaintenanceListView(generics.ListAPIView):
     """This view is for showing all the hosts apartments maintenance details"""
-    serializer_class = serializers.MaintenanceSerializer
+    serializer_class = serializers.HostMaintenanceSerializer
     authentication_classes = [TokenAuthentication]
 
     def get(self, request):
