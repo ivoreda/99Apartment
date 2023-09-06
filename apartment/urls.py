@@ -35,6 +35,9 @@ host_urls = [
     path('all-host-apartment/', views.HostApartmentListView.as_view(),
          name='all-host-apartments'),
 
+    path('host-apartment/<int:id>/',
+         views.HostApartmentByIdView.as_view(), name='host-apartment'),
+
     path('all-host-apartment-maintenance/', views.HostApartmentMaintenanceListView.as_view(),
          name='all-host-apartment-maintenance'),
 

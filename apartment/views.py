@@ -617,6 +617,38 @@ class HostApartmentListView(generics.ListAPIView):
         return Response({"status": True, "message": "Data retrieved successfully", "count": len(qs.data), "data": qs.data}, status=status.HTTP_200_OK)
 
 
+class HostApartmentByIdView(generics.RetrieveAPIView):
+    """View for getting the details of one host apartment"""
+    serializer_class = serializers.ApartmentSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            token = request.headers.get('Authorization')
+            clear_token = token[7:]
+            if token is None:
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception:
+            return Response({"status": False, "message": "Cannot get Auth token again"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = user_service.get_user(token=clear_token)
+            user_id = user['data']['id']
+            verified_status = user['data']['isVerified']
+        except Exception:
+            return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        apartment_id = self.kwargs.get('id')
+        apartment = models.Apartment.objects.filter(id=apartment_id).first()
+        if apartment:
+            serializer = self.serializer_class(apartment)
+            if int(apartment.owner_id) == user_id:
+                return Response({"status": True, "message": "Apartment retrieved successfully", "data": serializer.data}, status=status.HTTP_200_OK)
+            else:
+                return Response({"status": False, "message": "You are not the owner of this apartment"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"status": False, "message": "Apartment not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class HostApartmentMaintenanceListView(generics.ListAPIView):
     """This view is for showing all the hosts apartments maintenance details"""
     serializer_class = serializers.MaintenanceSerializer
