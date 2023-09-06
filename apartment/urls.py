@@ -84,6 +84,7 @@ guest_urls = [
          views.TransactionDetailsView.as_view(), name='transaction-details'),
     path('user/transactions/', views.TransactionHistoryView.as_view(),
          name='user-transaction-history'),
+     path('change-apartment/', views.ChangeApartmentView.as_view(), name='change-apartment'),
 
 ]
 

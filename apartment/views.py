@@ -1122,3 +1122,36 @@ class GetAllServicesView(generics.ListAPIView):
             'total_amount'] or 0
         qs = self.serializer_class(services, many=True)
         return Response({"status": True, "message": "Data retrieved successfully", "count": len(qs.data), "total_amount": total_amount, "data": qs.data}, status=status.HTTP_200_OK)
+
+
+class ChangeApartmentView(APIView):
+    serializer_class = serializers.ChangeApartmentSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        try:
+            token = request.headers.get('Authorization')
+            clear_token = token[7:]
+            if token is None:
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception:
+            return Response({"status": False, "message": "Cannot get Auth token again"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = user_service.get_user(token=clear_token)
+            user_id = user['data']['id']
+            verified_status = user['data']['isVerified']
+        except Exception:
+            return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if serializer.is_valid():
+            apartment_change = serializer.save()
+            apartment_change.resident_name = user['data']['first_name'] + " " + user['data']['last_name']
+            apartment_change.email = user['data']['email']
+            apartment_change.phone_number = user['data']['phone_number']
+            apartment_change.save()
+
+            apartment_change_notification = models.ChangeApartmentNotification.objects.create(resident_name=apartment_change.resident_name, message="This user wants to change apartments.")
+            return Response({"status": True, "message": "Request submitted successfully"}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

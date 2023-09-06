@@ -267,3 +267,12 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Service
         fields = '__all__'
+
+
+class ChangeApartmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ChangeApartment
+        fields = ['budget', 'current_apartment', 'preferred_space',
+                  'budget', 'preferred_facilities', 'reason_for_change',]
+                  

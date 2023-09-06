@@ -57,3 +57,19 @@ class AdditionalChargeAdmin(admin.ModelAdmin):
 @admin.register(models.Service)
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ['id', 'expense', 'status', 'amount']
+
+
+@admin.register(models.ChangeApartment)
+class ChangeApartmentAdmin(admin.ModelAdmin):
+    list_display = ['id', 'resident_name']
+
+
+class ChangeApartmentNotificationAdmin(admin.ModelAdmin):
+    list_display = ('resident_name', 'message', 'timestamp', 'is_read')
+
+    def message(self, obj):
+        return format_html('<a href="{}">{}</a>', reverse('admin:99Apartment_user_notification_change', args=[obj.pk]), obj.message)
+
+
+admin.site.register(models.ChangeApartmentNotification,
+                    ChangeApartmentNotificationAdmin)

@@ -48,7 +48,7 @@ class Apartment(models.Model):
 
     map_url = models.TextField(default="map url", blank=True, null=True)
     apartment_type = models.CharField(default='', max_length=255)
-    lease_type = models.CharField(default='Short Lease', choices=LEASE_TYPE)
+    lease_type = models.CharField(default='Long Lease', choices=LEASE_TYPE)
     tax = models.DecimalField(default=7.5, decimal_places=1, max_digits=10)
     tax_price = models.DecimalField(default=0, decimal_places=1, max_digits=10)
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
@@ -301,7 +301,7 @@ class CancellationPolicy(models.Model):
 
 
 class AdditionalCharge(models.Model):
-    name = models.CharField(max_length=500)
+    name = models.CharField(max_length=500, default='charge')
     amount = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -309,3 +309,38 @@ class AdditionalCharge(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class ChangeApartment(models.Model):
+    resident_name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=15)
+
+    current_apartment = models.ForeignKey(
+        Apartment, on_delete=models.CASCADE, related_name='current_apartment_changes')
+
+    preferred_space = models.CharField(max_length=20)
+
+    budget = models.CharField(max_length=15)
+    preferred_facilities = models.TextField()
+    reason_for_change = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.resident_name
+
+
+class ChangeApartmentNotification(models.Model):
+
+    resident_name = models.CharField(max_length=30)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.resident_name
