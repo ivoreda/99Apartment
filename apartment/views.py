@@ -437,7 +437,7 @@ class BookApartmentView(generics.CreateAPIView):
 class VerifyApartmentBooking(APIView):
     """View for verifying apartment booking payment"""
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         payment_reference = self.kwargs.get('reference')
 
         paystack_payment_verification_status = paystack_api.verify_transaction(
@@ -458,6 +458,15 @@ class VerifyApartmentBooking(APIView):
                 payment_reference=payment_reference).first()
             trnx_details.transaction_status = "success"
             trnx_details.save()
+
+            # email builder
+            start_date = apartment_booking.start_date
+            end_date = apartment_booking.end_date
+            user_email = apartment_booking.email
+            address = apartment_booking.apartment_id.address
+            apartment_name = apartment_booking.apartment_id.name
+
+            send_apartment_payment_successful_email(user_email, address, apartment_name, start_date, end_date)
             return Response({"status": True, "message": "Payment verified successfully"}, status=status.HTTP_200_OK)
         else:
             return Response({"status": False, "message": "Payment not verified"}, status=status.HTTP_400_BAD_REQUEST)
@@ -773,6 +782,17 @@ def send_apartment_booking_email(user_email, address, start_date, end_date):
     email_verification_email.fail_silently = True
     email_verification_email.send()
 
+def send_apartment_payment_successful_email(user_email, address, apartment_name, start_date, end_date):
+    subject = 'Payment Successful.'
+    from_email = settings.EMAIL_HOST_USER
+
+    email_template = render_to_string(
+        'inspection/emails/apartment-payment-successful.html', {'email': user_email, 'apartment_name': apartment_name, 'address': address, 'start_date': start_date, 'end_date': end_date})
+    email_verification_email = EmailMessage(
+        subject, email_template, from_email, [user_email]
+    )
+    email_verification_email.fail_silently = True
+    email_verification_email.send()
 
 class ApartmentReviewsListView(generics.ListAPIView):
     """View for getting an apartments reviews"""
