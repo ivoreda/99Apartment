@@ -1,5 +1,7 @@
 from django.db import models
 from cloudinary.models import CloudinaryField
+from decimal import Decimal
+
 
 # Create your models here.
 
@@ -36,7 +38,13 @@ class Apartment(models.Model):
     hasOccupants = models.BooleanField(default=False)
     isOccupied = models.BooleanField(default=False)
     _occupancy_rate = models.FloatField(default=0.0)
-    price = models.IntegerField(default=0)
+    price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+
+    master_bedroom_price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+    master_bedroom_tax_price = models.DecimalField(
+        default=0.0, decimal_places=1, max_digits=10)
+    master_bedroom_total_price = models.DecimalField(
+        default=0.0, decimal_places=1, max_digits=10)
 
     apartment_fees = models.JSONField(default=dict, blank=True, null=True)
     amenities = models.JSONField(
@@ -50,7 +58,7 @@ class Apartment(models.Model):
     apartment_type = models.CharField(default='', max_length=255)
     lease_type = models.CharField(default='Long Lease', choices=LEASE_TYPE)
     tax = models.DecimalField(default=7.5, decimal_places=1, max_digits=10)
-    tax_price = models.DecimalField(default=0, decimal_places=1, max_digits=10)
+    tax_price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     number_of_reviews = models.IntegerField(default=0)
 
@@ -65,7 +73,8 @@ class Apartment(models.Model):
     image5 = models.ImageField(
         upload_to='apartment-images/', blank=True, null=True)
 
-    total_price = models.IntegerField(default=0)
+    total_price = models.DecimalField(
+        default=0.0, decimal_places=1, max_digits=10)
     is_draft = models.BooleanField(default=False)
 
     verification_status = models.CharField(
@@ -116,13 +125,19 @@ class Apartment(models.Model):
         self.tax_price = self.price * self.tax / 100
         self.total_price = self.tax_price + \
             self.price + sum(total_apartment_fees)
+        if self.has_master_bedroom:
+            self.master_bedroom_price = (self.price * Decimal(0.3)) + self.price
+            self.master_bedroom_tax_price = self.master_bedroom_price * self.tax / 100
+            self.master_bedroom_total_price = self.master_bedroom_tax_price + \
+                self.master_bedroom_price + sum(total_apartment_fees)
         super(Apartment, self).save(*args, **kwargs)
 
 
 class ApartmentBooking(models.Model):
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     isPaidFor = models.BooleanField(default=False)
-    amount_paid = models.IntegerField(default=0)
+    paid_for_master_bedroom = models.BooleanField(default=False)
+    amount_paid = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     user_id = models.CharField(max_length=255)
     payment_link = models.CharField(max_length=255, default='payment link')
     email = models.EmailField(default='email')
@@ -230,7 +245,7 @@ class Maintenance(models.Model):
         choices=MAINTENANCE_STATUS, max_length=20, default='Pending')
     priority = models.CharField(choices=PRIORITY_LEVEL, default='Low')
     description = models.TextField()
-    cost = models.IntegerField(default=0)
+    cost = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     date_of_complaint = models.DateField(auto_now_add=True)
     time_of_complaint = models.TimeField(auto_now_add=True)
 
@@ -302,7 +317,7 @@ class CancellationPolicy(models.Model):
 
 class AdditionalCharge(models.Model):
     name = models.CharField(max_length=500, default='charge')
-    amount = models.IntegerField(default=0)
+    amount = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

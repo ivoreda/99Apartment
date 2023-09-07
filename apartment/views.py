@@ -11,6 +11,9 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
+
+
 from apartment import models, serializers
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -22,6 +25,11 @@ paystack_api = PaystackAPI()
 
 # Create your views here.
 
+
+
+class PageNumberPaginationMixin:
+    pagination_class = PageNumberPagination
+    page_size = 10 
 
 class ListApartmentView(generics.CreateAPIView):
     """View for listing apartment on platform"""
@@ -409,6 +417,7 @@ class BookApartmentView(generics.CreateAPIView):
                 amount_paid=apartment.total_price,
                 start_date=request.data['start_date'],
                 end_date=request.data['end_date'],
+                paid_for_master_bedroom=request.data['paid_for_master_bedroom'],
                 payment_reference=reference,
                 payment_link=authorization_url,
                 email=user_email,
@@ -932,6 +941,15 @@ def send_maintenance_request_email(user_email, address):
 def get_user_current_apartment(user_id):
     apartment = models.ApartmentBooking.objects.filter(user_id=user_id).last()
     return apartment.apartment_id
+
+class GetUserCurrentApartmentView(APIView):
+    serializer_class = serializers.ApartmentSerializer
+
+    def get(self, request):
+        apartment = models.ApartmentBooking.objects.filter(user_id=user_id).last()
+        qs = self.serializer_class(apartment)
+        return Response({'status': True, 'message': 'User apartment details retrieved successfully', 'data':qs.data}, status=status.HTTP_200_OK)
+        
 
 
 class UserMaintenanceHistoryView(generics.ListAPIView):

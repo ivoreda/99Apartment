@@ -10,11 +10,12 @@ class ApartmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
                   'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms',
                   'number_of_bathrooms', 'number_of_toilets', 'hasOccupants', 'isOccupied',
-                  'price', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
-                  'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'tax',
-                  'tax_price', 'rating', 'number_of_reviews', 'total_price', 'is_draft',
-                  'verification_status', 'images', 'has_master_bedroom',
-                  'credit_renting', 'shared_housing', 'created_at', 'updated_at',]
+                  'price', 'tax', 'tax_price', 'master_bedroom_price',  'master_bedroom_tax_price',
+                  'master_bedroom_total_price','apartment_fees', 'amenities', 'rules',
+                  'cancellation_policy', 'point_of_interest', 'map_url', 'apartment_type',
+                  'lease_type',  'rating', 'number_of_reviews', 'total_price',
+                  'is_draft', 'verification_status', 'images', 'has_master_bedroom', 'credit_renting',
+                  'shared_housing', 'created_at', 'updated_at',]
 
     def get_images(self, obj):
         image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']
@@ -42,9 +43,10 @@ class HostApartmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
                   'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms',
                   'number_of_bathrooms', 'number_of_toilets', 'hasOccupants', 'isOccupied',
-                  'price', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
-                  'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'tax',
-                  'tax_price', 'rating', 'number_of_reviews', 'total_price', 'is_draft',
+                  'price','tax','tax_price','total_price', 'master_bedroom_price', 
+                  'master_bedroom_tax_price','master_bedroom_total_price','apartment_fees', 
+                  'amenities', 'rules', 'cancellation_policy','point_of_interest', 'map_url', 
+                  'apartment_type', 'lease_type',  'rating', 'number_of_reviews', 'is_draft',
                   'verification_status', 'images', 'maintenance_requests', 'has_master_bedroom',
                   'credit_renting', 'shared_housing', 'created_at', 'updated_at',
                   'maintenance_count', 'occupancy_rate', 'amount_generated',]
@@ -70,7 +72,7 @@ class ListApartmentSerializer(serializers.ModelSerializer):
         fields = ['name', 'status', 'description',
                   'address', 'city', 'state', 'number_of_rooms',
                   'number_of_bathrooms', 'number_of_toilets',
-                  'price', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
+                  'price', 'master_bedroom_price', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
                   'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
                   'images', 'has_master_bedroom', 'credit_renting',
                   'shared_housing']
@@ -154,6 +156,7 @@ class ApartmentBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ApartmentBooking
         fields = ['apartment_id',
+                  'paid_for_master_bedroom',
                   'start_date',
                   'no_of_guests',
                   'end_date']
@@ -275,4 +278,3 @@ class ChangeApartmentSerializer(serializers.ModelSerializer):
         model = models.ChangeApartment
         fields = ['budget', 'current_apartment', 'preferred_space',
                   'budget', 'preferred_facilities', 'reason_for_change',]
-                  
