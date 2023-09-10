@@ -128,7 +128,7 @@ class Apartment(models.Model):
             self.price + sum(total_apartment_fees)
         if self.has_master_bedroom:
             self.master_bedroom_price = (self.price * Decimal(0.3)) + self.price
-            self.master_bedroom_tax_price = self.master_bedroom_price * self.tax / 100
+            self.master_bedroom_tax_price = self.master_bedroom_price * Decimal(self.tax) / 100
             self.master_bedroom_total_price = self.master_bedroom_tax_price + \
                 self.master_bedroom_price + sum(total_apartment_fees)
         super(Apartment, self).save(*args, **kwargs)
