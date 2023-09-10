@@ -122,7 +122,8 @@ class Apartment(models.Model):
             self.hasOccupants = False
         total_apartment_fees = [int(value)
                                 for value in self.apartment_fees.values()]
-        self.tax_price = self.price * self.tax / 100
+        self.tax_price = self.price * Decimal(self.tax) / 100
+
         self.total_price = self.tax_price + \
             self.price + sum(total_apartment_fees)
         if self.has_master_bedroom:
