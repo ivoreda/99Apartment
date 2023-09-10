@@ -140,7 +140,7 @@ class SaveApartmentDraftView(generics.CreateAPIView):
                 apartment.owner_id = user_id
                 apartment.owner_name = user_name
                 apartment.save()
-                return Response({"status": True, "message": "Draft saved successfully"}, status=status.HTTP_200_OK)
+                return Response({"status": True, "message": "Draft saved successfully", "apartment_id": apartment.id}, status=status.HTTP_200_OK)
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
