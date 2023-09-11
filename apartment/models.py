@@ -40,6 +40,8 @@ class Apartment(models.Model):
     _occupancy_rate = models.FloatField(default=0.0)
     price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
 
+    is_master_bedroom_available = models.BooleanField(default=True)
+
     master_bedroom_price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     master_bedroom_tax_price = models.DecimalField(
         default=0.0, decimal_places=1, max_digits=10)

@@ -400,6 +400,13 @@ class BookApartmentView(generics.CreateAPIView):
             if apartment.isOccupied:
                 return Response({"status": False, "message": "This apartment is full"})
 
+
+            # this is a check for if master bedroom is available
+            if request.data['paid_for_master_bedroom'] == True:
+                if apartment.is_master_bedroom_available == False:
+                    return Response({"status": False, "message": "This apartments master bedroom is taken."})
+
+
             booking_start_date = request.data['start_date']
             booking_end_date = request.data['end_date']
 
