@@ -137,6 +137,7 @@ class SaveApartmentDraftView(generics.CreateAPIView):
                                 upload_result['secure_url'])
 
                 apartment.is_draft = True
+                apartment.status = 'Draft'
                 apartment.owner_id = user_id
                 apartment.owner_name = user_name
                 apartment.save()
@@ -260,7 +261,8 @@ class EditApartmentView(APIView):
                         setattr(apartment, image_field_name,
                                 upload_result['secure_url'])
 
-                apartment.is_draft = True
+                apartment.is_draft = False
+                apartment.status = 'Pending'
                 apartment.owner_id = user_id
                 apartment.owner_name = user_name
                 apartment.save()
@@ -486,6 +488,7 @@ class VerifyApartmentBooking(APIView):
             return Response({"status": True, "message": "Payment verified successfully"}, status=status.HTTP_200_OK)
         else:
             return Response({"status": False, "message": "Payment not verified"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class SearchApartmentView(generics.ListAPIView):
@@ -784,7 +787,6 @@ def send_apartment_inspection_email(user_email, address, inspection_date):
     )
     email_verification_email.fail_silently = True
     email_verification_email.send()
-
 
 def send_apartment_booking_email(user_email, address, start_date, end_date):
     subject = 'Apartment Booking.'

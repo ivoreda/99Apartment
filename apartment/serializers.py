@@ -10,11 +10,11 @@ class ApartmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
                   'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms',
                   'number_of_bathrooms', 'number_of_toilets', 'hasOccupants', 'isOccupied',
-                  'price', 'tax', 'tax_price', 'master_bedroom_price', 'master_bedroom_tax_price',
+                  'price', 'owner_price', 'tax', 'tax_price', 'master_bedroom_price', 'master_bedroom_tax_price',
                   'master_bedroom_total_price', 'apartment_fees', 'amenities', 'rules',
                   'cancellation_policy', 'point_of_interest', 'map_url', 'apartment_type',
                   'lease_type',  'rating', 'number_of_reviews', 'total_price',
-                  'is_draft', 'verification_status', 'images', 'has_master_bedroom',
+                  'is_draft', 'images', 'has_master_bedroom',
                   'is_master_bedroom_available', 'credit_renting', 'shared_housing',
                   'created_at', 'updated_at',]
 
@@ -44,11 +44,11 @@ class HostApartmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
                   'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms',
                   'number_of_bathrooms', 'number_of_toilets', 'hasOccupants', 'isOccupied',
-                  'price', 'tax', 'tax_price', 'total_price', 'master_bedroom_price',
+                  'price', 'owner_price', 'tax', 'tax_price', 'total_price', 'master_bedroom_price',
                   'master_bedroom_tax_price', 'master_bedroom_total_price', 'apartment_fees',
                   'amenities', 'rules', 'cancellation_policy', 'point_of_interest', 'map_url',
                   'apartment_type', 'lease_type',  'rating', 'number_of_reviews', 'is_draft',
-                  'verification_status', 'images', 'maintenance_requests', 'has_master_bedroom',
+                  'images', 'maintenance_requests', 'has_master_bedroom',
                   'is_master_bedroom_available', 'credit_renting', 'shared_housing', 'created_at',
                   'updated_at', 'maintenance_count', 'occupancy_rate', 'amount_generated',]
 
@@ -70,10 +70,9 @@ class ListApartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Apartment
-        fields = ['name', 'status', 'description',
-                  'address', 'city', 'state', 'number_of_rooms',
-                  'number_of_bathrooms', 'number_of_toilets',
-                  'price', 'master_bedroom_price', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
+        fields = ['name', 'status', 'description','address', 'city', 'state', 'number_of_rooms',
+                  'number_of_bathrooms', 'number_of_toilets','price', 'owner_price','master_bedroom_price',
+                  'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
                   'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
                   'images', 'has_master_bedroom', 'is_master_bedroom_available', 'credit_renting',
                   'shared_housing']
@@ -128,8 +127,8 @@ class SaveApartmentDraftSerializer(serializers.ModelSerializer):
         model = models.Apartment
         fields = ['name', 'status', 'description',
                   'address', 'city', 'state', 'number_of_rooms',
-                  'number_of_bathrooms', 'number_of_toilets',
-                  'price', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
+                  'number_of_bathrooms', 'number_of_toilets','price', 'owner_price', 
+                  'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
                   'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
                   'images', 'has_master_bedroom', 'credit_renting',
                   'shared_housing']
@@ -254,7 +253,7 @@ class HostMaintenanceSerializer(serializers.ModelSerializer):
         model = models.Maintenance
         fields = ['apartment_detail', 'user_id', 'name', 'phone_number',
                   'apartment_id', 'maintenance_category', 'maintenance_type',
-                  'status', 'description', 'cost',
+                  'priority', 'status', 'description', 'cost',
                   'date_of_complaint', 'time_of_complaint',]
 
     def get_apartment_detail(self, obj):

@@ -13,7 +13,11 @@ class Apartment(models.Model):
                   ('Long Lease', 'Long Lease'))
 
     APARTMENT_STATUS = (('Listed', 'Listed'),
-                        ('Unlisted', 'Unlisted'),)
+                        ('Unlisted', 'Unlisted'),
+                        ('Pending', 'Pending'),
+                        # ('Unverified', 'Unverified'),
+                        # ('Verified', 'Verified'),
+                        ('Draft', 'Draft'),)
 
     APARTMENT_VERIFICATION_STATUS = (('Pending', 'Pending'),
                                      ('Unverified', 'Unverified'),
@@ -25,7 +29,7 @@ class Apartment(models.Model):
         max_length=255, help_text='Apartment owner name', default='owner name')
     name = models.CharField(max_length=255, help_text="Apartment name")
     status = models.CharField(
-        max_length=255, choices=APARTMENT_STATUS, default='Unlisted')
+        max_length=255, choices=APARTMENT_STATUS, default='Unverified')
     description = models.TextField(help_text="Enter apartment description")
     address = models.TextField(help_text="Enter apartment address")
     city = models.CharField(max_length=50, help_text="City")
@@ -38,11 +42,17 @@ class Apartment(models.Model):
     hasOccupants = models.BooleanField(default=False)
     isOccupied = models.BooleanField(default=False)
     _occupancy_rate = models.FloatField(default=0.0)
+
+    # owner_price field for the owner to add, 
+    owner_price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+
+    # admin will edit this price
     price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
 
     is_master_bedroom_available = models.BooleanField(default=True)
 
-    master_bedroom_price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+    master_bedroom_price = models.DecimalField(
+        default=0.0, decimal_places=1, max_digits=10)
     master_bedroom_tax_price = models.DecimalField(
         default=0.0, decimal_places=1, max_digits=10)
     master_bedroom_total_price = models.DecimalField(
@@ -60,7 +70,8 @@ class Apartment(models.Model):
     apartment_type = models.CharField(default='', max_length=255)
     lease_type = models.CharField(default='Long Lease', choices=LEASE_TYPE)
     tax = models.DecimalField(default=7.5, decimal_places=1, max_digits=10)
-    tax_price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+    tax_price = models.DecimalField(
+        default=0.0, decimal_places=1, max_digits=10)
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     number_of_reviews = models.IntegerField(default=0)
 
@@ -79,8 +90,8 @@ class Apartment(models.Model):
         default=0.0, decimal_places=1, max_digits=10)
     is_draft = models.BooleanField(default=False)
 
-    verification_status = models.CharField(
-        choices=APARTMENT_VERIFICATION_STATUS, default='Unverified')
+    # verification_status = models.CharField(
+    #     choices=APARTMENT_VERIFICATION_STATUS, default='Unverified')
 
     has_master_bedroom = models.BooleanField(default=False)
     credit_renting = models.BooleanField(default=False)
@@ -129,8 +140,10 @@ class Apartment(models.Model):
         self.total_price = self.tax_price + \
             self.price + sum(total_apartment_fees)
         if self.has_master_bedroom:
-            self.master_bedroom_price = (self.price * Decimal(0.3)) + self.price
-            self.master_bedroom_tax_price = self.master_bedroom_price * Decimal(self.tax) / 100
+            self.master_bedroom_price = (
+                self.price * Decimal(0.3)) + self.price
+            self.master_bedroom_tax_price = self.master_bedroom_price * \
+                Decimal(self.tax) / 100
             self.master_bedroom_total_price = self.master_bedroom_tax_price + \
                 self.master_bedroom_price + sum(total_apartment_fees)
         super(Apartment, self).save(*args, **kwargs)
@@ -140,7 +153,8 @@ class ApartmentBooking(models.Model):
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     isPaidFor = models.BooleanField(default=False)
     paid_for_master_bedroom = models.BooleanField(default=False)
-    amount_paid = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+    amount_paid = models.DecimalField(
+        default=0.0, decimal_places=1, max_digits=10)
     user_id = models.CharField(max_length=255)
     payment_link = models.CharField(max_length=255, default='payment link')
     email = models.EmailField(default='email')
