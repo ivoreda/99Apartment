@@ -84,6 +84,8 @@ class ListApartmentView(generics.CreateAPIView):
                     apartment.owner_id = user_id
                     apartment.owner_name = user_name
                     apartment.is_draft = False
+                    if apartment.has_master_bedroom == True:
+                        apartment.is_master_bedroom_available = True
                     apartment.save()
                     return Response({"status": False,  "message": "Apartment added successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
                 else:

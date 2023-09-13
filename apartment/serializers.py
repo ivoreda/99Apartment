@@ -71,7 +71,7 @@ class ListApartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
         fields = ['name', 'status', 'description','address', 'city', 'state', 'number_of_rooms',
-                  'number_of_bathrooms', 'number_of_toilets','price', 'owner_price','master_bedroom_price',
+                  'number_of_bathrooms', 'number_of_toilets', 'owner_price','master_bedroom_price',
                   'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
                   'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
                   'images', 'has_master_bedroom', 'is_master_bedroom_available', 'credit_renting',
@@ -127,7 +127,7 @@ class SaveApartmentDraftSerializer(serializers.ModelSerializer):
         model = models.Apartment
         fields = ['name', 'status', 'description',
                   'address', 'city', 'state', 'number_of_rooms',
-                  'number_of_bathrooms', 'number_of_toilets','price', 'owner_price', 
+                  'number_of_bathrooms', 'number_of_toilets', 'owner_price', 
                   'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
                   'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
                   'images', 'has_master_bedroom', 'credit_renting',

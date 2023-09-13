@@ -43,13 +43,12 @@ class Apartment(models.Model):
     isOccupied = models.BooleanField(default=False)
     _occupancy_rate = models.FloatField(default=0.0)
 
-    # owner_price field for the owner to add, 
-    owner_price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+    # owner_price field for the owner to add,
+    owner_price = models.DecimalField(
+        default=0.0, decimal_places=1, max_digits=10)
 
     # admin will edit this price
-    price = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
-
-    is_master_bedroom_available = models.BooleanField(default=True)
+    price = models.DecimalField(default=10.0, decimal_places=1, max_digits=10)
 
     master_bedroom_price = models.DecimalField(
         default=0.0, decimal_places=1, max_digits=10)
@@ -93,6 +92,7 @@ class Apartment(models.Model):
     # verification_status = models.CharField(
     #     choices=APARTMENT_VERIFICATION_STATUS, default='Unverified')
 
+    is_master_bedroom_available = models.BooleanField(default=True)
     has_master_bedroom = models.BooleanField(default=False)
     credit_renting = models.BooleanField(default=False)
     shared_housing = models.BooleanField(default=False)
@@ -135,15 +135,13 @@ class Apartment(models.Model):
             self.hasOccupants = False
         total_apartment_fees = [int(value)
                                 for value in self.apartment_fees.values()]
-        self.tax_price = self.price * Decimal(self.tax) / 100
-
+        self.tax_price = self.price * self.tax / 100
         self.total_price = self.tax_price + \
             self.price + sum(total_apartment_fees)
         if self.has_master_bedroom:
             self.master_bedroom_price = (
-                self.price * Decimal(0.3)) + self.price
-            self.master_bedroom_tax_price = self.master_bedroom_price * \
-                Decimal(self.tax) / 100
+                self.price * 0.3) + self.price
+            self.master_bedroom_tax_price = self.master_bedroom_price * self.tax / 100
             self.master_bedroom_total_price = self.master_bedroom_tax_price + \
                 self.master_bedroom_price + sum(total_apartment_fees)
         super(Apartment, self).save(*args, **kwargs)
