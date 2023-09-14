@@ -70,8 +70,8 @@ class ListApartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Apartment
-        fields = ['name', 'status', 'description','address', 'city', 'state', 'number_of_rooms',
-                  'number_of_bathrooms', 'number_of_toilets', 'owner_price','master_bedroom_price',
+        fields = ['name', 'status', 'description', 'address', 'city', 'state', 'number_of_rooms',
+                  'number_of_bathrooms', 'number_of_toilets', 'owner_price', 'master_bedroom_price',
                   'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
                   'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
                   'images', 'has_master_bedroom', 'is_master_bedroom_available', 'credit_renting',
@@ -127,7 +127,7 @@ class SaveApartmentDraftSerializer(serializers.ModelSerializer):
         model = models.Apartment
         fields = ['name', 'status', 'description',
                   'address', 'city', 'state', 'number_of_rooms',
-                  'number_of_bathrooms', 'number_of_toilets', 'owner_price', 
+                  'number_of_bathrooms', 'number_of_toilets', 'owner_price',
                   'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
                   'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
                   'images', 'has_master_bedroom', 'credit_renting',
@@ -165,7 +165,7 @@ class ApartmentBookingSerializer(serializers.ModelSerializer):
 class CheckoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ApartmentBooking
-        fields = ['apartment_id', 'isPaidFor', 'amount_paid',
+        fields = ['apartment_id', 'isPaidFor', 'paid_for_master_bedroom', 'amount_paid',
                   'user_id', 'payment_link', 'email', 'first_name',
                   'last_name', 'phone_number', 'start_date',
                   'end_date', 'payment_reference', 'cover_photo', 'no_of_guests']

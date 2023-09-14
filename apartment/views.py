@@ -26,10 +26,10 @@ paystack_api = PaystackAPI()
 # Create your views here.
 
 
-
 class PageNumberPaginationMixin:
     pagination_class = PageNumberPagination
-    page_size = 10 
+    page_size = 10
+
 
 class ListApartmentView(generics.CreateAPIView):
     """View for listing apartment on platform"""
@@ -359,8 +359,12 @@ class CheckoutApartmentView(generics.ListAPIView):
             return Response({"status": False, "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
 
         reference = self.kwargs.get('reference')
+
         booking = models.ApartmentBooking.objects.filter(
             payment_reference=reference).first()
+
+        if booking is None:
+            return Response({"status": False, "message": "Apartment booking not found."}, status=status.HTTP_400_BAD_REQUEST)
         apartment_id = booking.apartment_id.id
         apartment = models.Apartment.objects.filter(
             id=apartment_id).first()
@@ -404,12 +408,10 @@ class BookApartmentView(generics.CreateAPIView):
             if apartment.isOccupied:
                 return Response({"status": False, "message": "This apartment is full"})
 
-
             # this is a check for if master bedroom is available
             if request.data['paid_for_master_bedroom'] == True:
                 if apartment.is_master_bedroom_available == False:
                     return Response({"status": False, "message": "This apartments master bedroom is taken."})
-
 
             booking_start_date = request.data['start_date']
             booking_end_date = request.data['end_date']
@@ -421,6 +423,24 @@ class BookApartmentView(generics.CreateAPIView):
                 email=user_email, amount=apartment.total_price)
             authorization_url = paystack_response['data']['authorization_url']
             reference = paystack_response['data']['reference']
+
+            if request.data['paid_for_master_bedroom'] == True:
+                booking = models.ApartmentBooking.objects.create(
+                    apartment_id=apartment,
+                    user_id=user_id,
+                    amount_paid=apartment.master_bedroom_total_price,
+                    start_date=request.data['start_date'],
+                    end_date=request.data['end_date'],
+                    paid_for_master_bedroom=request.data['paid_for_master_bedroom'],
+                    payment_reference=reference,
+                    payment_link=authorization_url,
+                    email=user_email,
+                    first_name=user['data']['first_name'],
+                    last_name=user['data']['last_name'],
+                    phone_number=user['data']['phone_number'],
+                    no_of_guests=request.data['no_of_guests'],
+                    cover_photo=apartment.image1
+                )
 
             booking = models.ApartmentBooking.objects.create(
                 apartment_id=apartment,
@@ -486,11 +506,11 @@ class VerifyApartmentBooking(APIView):
             address = apartment_booking.apartment_id.address
             apartment_name = apartment_booking.apartment_id.name
 
-            send_apartment_payment_successful_email(user_email, address, apartment_name, start_date, end_date)
+            send_apartment_payment_successful_email(
+                user_email, address, apartment_name, start_date, end_date)
             return Response({"status": True, "message": "Payment verified successfully"}, status=status.HTTP_200_OK)
         else:
             return Response({"status": False, "message": "Payment not verified"}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class SearchApartmentView(generics.ListAPIView):
@@ -757,12 +777,11 @@ class BookApartmentInspectionView(generics.CreateAPIView):
                 inspection_date=request.data['inspection_date'],
                 inspection_time=request.data['inspection_time'],
             )
-            # try:
-            #     send_apartment_inspection_email(
-            #         user_email, address, inspection_date=request.data['inspection_date'])
-            # except Exception:
-            #     return Response({"status": False, "message": "Server Error"}, status=status.HTTP_400_BAD_REQUEST)
-
+            try:
+                send_apartment_inspection_email(
+                    user_email, address, inspection_date=request.data['inspection_date'])
+            except Exception:
+                return Response({"status": False, "message": "Server Error"}, status=status.HTTP_400_BAD_REQUEST)
             return Response({"status": True, "message": "Inspection booked successfully"}, status=status.HTTP_200_OK)
 
 
@@ -790,6 +809,7 @@ def send_apartment_inspection_email(user_email, address, inspection_date):
     email_verification_email.fail_silently = True
     email_verification_email.send()
 
+
 def send_apartment_booking_email(user_email, address, start_date, end_date):
     subject = 'Apartment Booking.'
     from_email = settings.EMAIL_HOST_USER
@@ -802,6 +822,7 @@ def send_apartment_booking_email(user_email, address, start_date, end_date):
     email_verification_email.fail_silently = True
     email_verification_email.send()
 
+
 def send_apartment_payment_successful_email(user_email, address, apartment_name, start_date, end_date):
     subject = 'Payment Successful.'
     from_email = settings.EMAIL_HOST_USER
@@ -813,6 +834,7 @@ def send_apartment_payment_successful_email(user_email, address, apartment_name,
     )
     email_verification_email.fail_silently = True
     email_verification_email.send()
+
 
 class ApartmentReviewsListView(generics.ListAPIView):
     """View for getting an apartments reviews"""
@@ -914,7 +936,8 @@ class MaintenanceRequestView(generics.CreateAPIView):
                 user_id = user['data']['id']
                 user_email = user['data']['email']
                 verified_status = user['data']['isVerified']
-                user_full_name = user['data']['first_name'] + " " + user['data']['last_name']
+                user_full_name = user['data']['first_name'] + \
+                    " " + user['data']['last_name']
             except Exception:
                 return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
             if not verified_status:
@@ -953,14 +976,15 @@ def get_user_current_apartment(user_id):
     apartment = models.ApartmentBooking.objects.filter(user_id=user_id).last()
     return apartment.apartment_id
 
+
 class GetUserCurrentApartmentView(APIView):
     serializer_class = serializers.ApartmentSerializer
 
     def get(self, request):
-        apartment = models.ApartmentBooking.objects.filter(user_id=user_id).last()
+        apartment = models.ApartmentBooking.objects.filter(
+            user_id=user_id).last()
         qs = self.serializer_class(apartment)
-        return Response({'status': True, 'message': 'User apartment details retrieved successfully', 'data':qs.data}, status=status.HTTP_200_OK)
-        
+        return Response({'status': True, 'message': 'User apartment details retrieved successfully', 'data': qs.data}, status=status.HTTP_200_OK)
 
 
 class UserMaintenanceHistoryView(generics.ListAPIView):
@@ -978,17 +1002,35 @@ class UserMaintenanceHistoryView(generics.ListAPIView):
 
         try:
             user = user_service.get_user(token=clear_token)
-            print("user", user)
             user_id = user['data']['id']
             verified_status = user['data']['isVerified']
         except Exception:
             return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
         if not verified_status:
             return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        emergency_requests = request.query_params.get('emergency_requests', None)
+        pending_requests = request.query_params.get('pending_requests', None)
+        completed_requests = request.query_params.get('completed_requests', None)
 
-        queryset = models.Maintenance.objects.filter(user_id=user_id)
-        qs = self.serializer_class(queryset, many=True)
-        return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data}, status=status.HTTP_200_OK)
+        try:
+            if completed_requests:
+                items = models.Maintenance.objects.filter(user_id=user_id, status='Done')
+            
+            if pending_requests:
+                items = models.Maintenance.objects.filter(user_id=user_id, status='In Progress')
+
+            if emergency_requests:
+                items = models.Maintenance.objects.filter(user_id=user_id, maintenance_category='Emergency')
+
+            qs = self.serializer_class(items, many=True)
+            return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data}, status=status.HTTP_200_OK) 
+        
+
+        except Exception:
+            queryset = models.Maintenance.objects.filter(user_id=user_id)
+            qs = self.serializer_class(queryset, many=True)
+            return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data}, status=status.HTTP_200_OK)
 
 
 class TransactionDetailsView(generics.RetrieveAPIView):
@@ -1175,12 +1217,14 @@ class ChangeApartmentView(APIView):
 
         if serializer.is_valid():
             apartment_change = serializer.save()
-            apartment_change.resident_name = user['data']['first_name'] + " " + user['data']['last_name']
+            apartment_change.resident_name = user['data']['first_name'] + \
+                " " + user['data']['last_name']
             apartment_change.email = user['data']['email']
             apartment_change.phone_number = user['data']['phone_number']
             apartment_change.save()
 
-            apartment_change_notification = models.ChangeApartmentNotification.objects.create(resident_name=apartment_change.resident_name, message="This user wants to change apartments.")
+            apartment_change_notification = models.ChangeApartmentNotification.objects.create(
+                resident_name=apartment_change.resident_name, message="This user wants to change apartments.")
             return Response({"status": True, "message": "Request submitted successfully"}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
