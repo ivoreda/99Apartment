@@ -1008,29 +1008,52 @@ class UserMaintenanceHistoryView(generics.ListAPIView):
             return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
         if not verified_status:
             return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        emergency_requests = request.query_params.get('emergency_requests', None)
+
+        emergency_requests = request.query_params.get(
+            'emergency_requests', None)
         pending_requests = request.query_params.get('pending_requests', None)
-        completed_requests = request.query_params.get('completed_requests', None)
+        completed_requests = request.query_params.get(
+            'completed_requests', None)
 
         try:
             if completed_requests:
-                items = models.Maintenance.objects.filter(user_id=user_id, status='Done')
-            
+                items = models.Maintenance.objects.filter(
+                    user_id=user_id, status='Done')
+
             if pending_requests:
-                items = models.Maintenance.objects.filter(user_id=user_id, status='In Progress')
+                items = models.Maintenance.objects.filter(
+                    user_id=user_id, status='In Progress')
 
             if emergency_requests:
-                items = models.Maintenance.objects.filter(user_id=user_id, maintenance_category='Emergency')
+                items = models.Maintenance.objects.filter(
+                    user_id=user_id, maintenance_category='Emergency')
 
             qs = self.serializer_class(items, many=True)
-            return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data}, status=status.HTTP_200_OK) 
-        
+            return Response({"status": True, "message": "Data retrieved successfully", "count": len(qs.data), "data": qs.data}, status=status.HTTP_200_OK)
 
         except Exception:
             queryset = models.Maintenance.objects.filter(user_id=user_id)
+
+            completed_requests_count = models.Maintenance.objects.filter(
+                user_id=user_id, status='Done')
+            completed_requests_count_qs = self.serializer_class(
+                completed_requests_count, many=True)
+
+            pending_requests_count = models.Maintenance.objects.filter(
+                user_id=user_id, status='In Progress')
+            pending_requests_count_qs = self.serializer_class(
+                pending_requests_count, many=True)
+
+            emergency_requests_count = models.Maintenance.objects.filter(
+                user_id=user_id, maintenance_category='Emergency')
+            emergency_requests_count_qs = self.serializer_class(
+                completed_requests_count, many=True)
+
             qs = self.serializer_class(queryset, many=True)
-            return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data}, status=status.HTTP_200_OK)
+            return Response({"status": True, "message": "Data retrieved successfully", "total_count": len(qs.data),
+                             "completed_requests_count": len(completed_requests_count_qs.data),
+                             "pending_requests_count": len(pending_requests_count_qs.data),
+                             "emergency_requests_count": len(emergency_requests_count_qs.data), "data": qs.data}, status=status.HTTP_200_OK)
 
 
 class TransactionDetailsView(generics.RetrieveAPIView):
