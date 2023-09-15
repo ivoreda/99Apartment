@@ -11,7 +11,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms',
                   'number_of_bathrooms', 'number_of_toilets', 'hasOccupants', 'isOccupied',
                   'price', 'owner_price', 'tax', 'tax_price', 'master_bedroom_price', 'master_bedroom_tax_price',
-                  'master_bedroom_total_price', 'apartment_fees', 'amenities', 'rules',
+                  'master_bedroom_total_price', 'other_rooms', 'apartment_fees', 'amenities', 'rules',
                   'cancellation_policy', 'point_of_interest', 'map_url', 'apartment_type',
                   'lease_type',  'rating', 'number_of_reviews', 'total_price',
                   'is_draft', 'images', 'has_master_bedroom',
@@ -45,7 +45,7 @@ class HostApartmentSerializer(serializers.ModelSerializer):
                   'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms',
                   'number_of_bathrooms', 'number_of_toilets', 'hasOccupants', 'isOccupied',
                   'price', 'owner_price', 'tax', 'tax_price', 'total_price', 'master_bedroom_price',
-                  'master_bedroom_tax_price', 'master_bedroom_total_price', 'apartment_fees',
+                  'master_bedroom_tax_price', 'master_bedroom_total_price', 'other_rooms', 'apartment_fees',
                   'amenities', 'rules', 'cancellation_policy', 'point_of_interest', 'map_url',
                   'apartment_type', 'lease_type',  'rating', 'number_of_reviews', 'is_draft',
                   'images', 'maintenance_requests', 'has_master_bedroom',
@@ -70,9 +70,9 @@ class ListApartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Apartment
-        fields = ['name', 'status', 'description', 'address', 'city', 'state', 'number_of_rooms',
+        fields = ['id', 'name', 'status', 'description', 'address', 'city', 'state', 'number_of_rooms',
                   'number_of_bathrooms', 'number_of_toilets', 'owner_price', 'master_bedroom_price',
-                  'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
+                  'other_rooms', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
                   'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
                   'images', 'has_master_bedroom', 'is_master_bedroom_available', 'credit_renting',
                   'shared_housing']
@@ -158,7 +158,7 @@ class ApartmentBookingSerializer(serializers.ModelSerializer):
         fields = ['apartment_id',
                   'paid_for_master_bedroom',
                   'start_date',
-                  'no_of_guests',
+                  'no_of_rooms',
                   'end_date']
 
 

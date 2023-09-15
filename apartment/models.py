@@ -44,18 +44,20 @@ class Apartment(models.Model):
     _occupancy_rate = models.FloatField(default=0.0)
 
     # owner_price field for the owner to add,
-    owner_price = models.DecimalField(
-        default=0.0, decimal_places=1, max_digits=10)
+    owner_price = models.IntegerField(
+        default=0)
 
     # admin will edit this price
-    price = models.DecimalField(default=10.0, decimal_places=1, max_digits=10)
+    price = models.IntegerField(default=10)
 
-    master_bedroom_price = models.DecimalField(
-        default=0.0, decimal_places=1, max_digits=10)
-    master_bedroom_tax_price = models.DecimalField(
-        default=0.0, decimal_places=1, max_digits=10)
-    master_bedroom_total_price = models.DecimalField(
-        default=0.0, decimal_places=1, max_digits=10)
+    master_bedroom_price = models.IntegerField(
+        default=0)
+    master_bedroom_tax_price = models.IntegerField(
+        default=0)
+    master_bedroom_total_price = models.IntegerField(
+        default=0)
+
+    other_rooms = models.JSONField(default=[])
 
     apartment_fees = models.JSONField(default=dict, blank=True, null=True)
     amenities = models.JSONField(
@@ -68,9 +70,11 @@ class Apartment(models.Model):
     map_url = models.TextField(default="map url", blank=True, null=True)
     apartment_type = models.CharField(default='', max_length=255)
     lease_type = models.CharField(default='Long Lease', choices=LEASE_TYPE)
-    tax = models.DecimalField(default=7.5, decimal_places=1, max_digits=10)
-    tax_price = models.DecimalField(
-        default=0.0, decimal_places=1, max_digits=10)
+    tax = models.FloatField(default=7.5)
+    master_bedroom_percentage = models.FloatField(
+        default=0.3)
+    tax_price = models.IntegerField(
+        default=0)
     rating = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
     number_of_reviews = models.IntegerField(default=0)
 
@@ -85,8 +89,8 @@ class Apartment(models.Model):
     image5 = models.ImageField(
         upload_to='apartment-images/', blank=True, null=True)
 
-    total_price = models.DecimalField(
-        default=0.0, decimal_places=1, max_digits=10)
+    total_price = models.IntegerField(
+        default=0)
     is_draft = models.BooleanField(default=False)
 
     # verification_status = models.CharField(
@@ -140,10 +144,17 @@ class Apartment(models.Model):
             self.price + sum(total_apartment_fees)
         if self.has_master_bedroom:
             self.master_bedroom_price = (
-                self.price * 0.3) + self.price
+                self.price * self.master_bedroom_percentage) + self.price
             self.master_bedroom_tax_price = self.master_bedroom_price * self.tax / 100
             self.master_bedroom_total_price = self.master_bedroom_tax_price + \
                 self.master_bedroom_price + sum(total_apartment_fees)
+
+        self.other_rooms = []
+
+        for i in range(1, self.number_of_rooms):
+            room = {'id': i, 'price': self.price,
+                    'total_price': self.total_price}
+            self.other_rooms.append(room)
         super(Apartment, self).save(*args, **kwargs)
 
 
@@ -151,8 +162,8 @@ class ApartmentBooking(models.Model):
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     isPaidFor = models.BooleanField(default=False)
     paid_for_master_bedroom = models.BooleanField(default=False)
-    amount_paid = models.DecimalField(
-        default=0.0, decimal_places=1, max_digits=10)
+    amount_paid = models.IntegerField(
+        default=0)
     user_id = models.CharField(max_length=255)
     payment_link = models.CharField(max_length=255, default='payment link')
     email = models.EmailField(default='email')
@@ -162,7 +173,7 @@ class ApartmentBooking(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     payment_reference = models.CharField(max_length=255)
-    no_of_guests = models.IntegerField(default=1)
+    no_of_rooms = models.IntegerField(default=1)
     cover_photo = models.TextField(default='photo')
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -260,7 +271,7 @@ class Maintenance(models.Model):
         choices=MAINTENANCE_STATUS, max_length=20, default='Pending')
     priority = models.CharField(choices=PRIORITY_LEVEL, default='Low')
     description = models.TextField()
-    cost = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+    cost = models.IntegerField(default=0)
     date_of_complaint = models.DateField(auto_now_add=True)
     time_of_complaint = models.TimeField(auto_now_add=True)
 
@@ -281,7 +292,7 @@ class Service(models.Model):
     expense = models.CharField(max_length=255)
     status = models.CharField(
         choices=SERVICE_PAYMENT_STATUS, default='Pending')
-    amount = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+    amount = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -332,7 +343,7 @@ class CancellationPolicy(models.Model):
 
 class AdditionalCharge(models.Model):
     name = models.CharField(max_length=500, default='charge')
-    amount = models.DecimalField(default=0.0, decimal_places=1, max_digits=10)
+    amount = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -363,7 +374,6 @@ class ChangeApartment(models.Model):
 
 
 class ChangeApartmentNotification(models.Model):
-
     resident_name = models.CharField(max_length=30)
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)

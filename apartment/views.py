@@ -428,7 +428,7 @@ class BookApartmentView(generics.CreateAPIView):
                 booking = models.ApartmentBooking.objects.create(
                     apartment_id=apartment,
                     user_id=user_id,
-                    amount_paid=apartment.master_bedroom_total_price,
+                    amount_paid=((request.data['no_of_rooms'] - 1) * apartment.total_price) +  apartment.master_bedroom_total_price,
                     start_date=request.data['start_date'],
                     end_date=request.data['end_date'],
                     paid_for_master_bedroom=request.data['paid_for_master_bedroom'],
@@ -438,14 +438,14 @@ class BookApartmentView(generics.CreateAPIView):
                     first_name=user['data']['first_name'],
                     last_name=user['data']['last_name'],
                     phone_number=user['data']['phone_number'],
-                    no_of_guests=request.data['no_of_guests'],
+                    no_of_rooms=request.data['no_of_rooms'],
                     cover_photo=apartment.image1
                 )
 
             booking = models.ApartmentBooking.objects.create(
                 apartment_id=apartment,
                 user_id=user_id,
-                amount_paid=apartment.total_price,
+                amount_paid=request.data['no_of_rooms'] * apartment.total_price,
                 start_date=request.data['start_date'],
                 end_date=request.data['end_date'],
                 paid_for_master_bedroom=request.data['paid_for_master_bedroom'],
@@ -455,7 +455,7 @@ class BookApartmentView(generics.CreateAPIView):
                 first_name=user['data']['first_name'],
                 last_name=user['data']['last_name'],
                 phone_number=user['data']['phone_number'],
-                no_of_guests=request.data['no_of_guests'],
+                no_of_rooms=request.data['no_of_rooms'],
                 cover_photo=apartment.image1
             )
 
@@ -492,7 +492,7 @@ class VerifyApartmentBooking(APIView):
             apartment_booking.save()
             apartment = models.Apartment.objects.filter(
                 id=apartment_id).first()
-            apartment.number_of_occupants += 1
+            apartment.number_of_occupants += apartment_booking.no_of_rooms
             apartment.save()
             trnx_details = models.Transaction.objects.filter(
                 payment_reference=payment_reference).first()
