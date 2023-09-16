@@ -168,7 +168,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
         fields = ['apartment_id', 'isPaidFor', 'paid_for_master_bedroom', 'amount_paid',
                   'user_id', 'payment_link', 'email', 'first_name',
                   'last_name', 'phone_number', 'start_date',
-                  'end_date', 'payment_reference', 'cover_photo', 'no_of_guests']
+                  'end_date', 'payment_reference', 'cover_photo', 'no_of_rooms']
 
 
 class VerifyApartmentBookingSerializer(serializers.ModelSerializer):
