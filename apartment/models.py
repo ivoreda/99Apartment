@@ -144,7 +144,7 @@ class Apartment(models.Model):
             self.price + sum(total_apartment_fees)
         if self.has_master_bedroom:
             self.master_bedroom_price = (
-                self.price * self.master_bedroom_percentage) + self.price
+                (self.price/self.number_of_rooms) * self.master_bedroom_percentage) + (self.price/self.number_of_rooms)
             self.master_bedroom_tax_price = self.master_bedroom_price * self.tax / 100
             self.master_bedroom_total_price = self.master_bedroom_tax_price + \
                 self.master_bedroom_price + sum(total_apartment_fees)
@@ -152,8 +152,8 @@ class Apartment(models.Model):
         self.other_rooms = []
 
         for i in range(1, self.number_of_rooms):
-            room = {'id': i, 'price': self.price,
-                    'total_price': self.total_price}
+            room = {'id': i, 'price': self.price/self.number_of_rooms,
+                    'total_price': ((round(self.total_price/self.number_of_rooms) // 10 + 1) * 10)}
             self.other_rooms.append(room)
         super(Apartment, self).save(*args, **kwargs)
 

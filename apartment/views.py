@@ -419,16 +419,24 @@ class BookApartmentView(generics.CreateAPIView):
             if request.data['end_date'] < request.data['start_date']:
                 return Response({"status": False, "message": "Start date cannot be greater than end date"})
 
-            paystack_response = paystack_api.initialise_transaction(
-                email=user_email, amount=apartment.total_price)
-            authorization_url = paystack_response['data']['authorization_url']
-            reference = paystack_response['data']['reference']
+            # do calculation here for the number of rooms to pay for and send the correct price
+            no_of_rooms = request.data['no_of_rooms']
+
+            single_apartment_price = ((round(apartment.total_price/apartment.number_of_rooms) // 10 + 1) * 10)
+
+
 
             if request.data['paid_for_master_bedroom'] == True:
+                paystack_response = paystack_api.initialise_transaction(
+                    email=user_email, amount=((no_of_rooms - 1) * single_apartment_price) + apartment.master_bedroom_total_price)
+                authorization_url = paystack_response['data']['authorization_url']
+                reference = paystack_response['data']['reference']
+
                 booking = models.ApartmentBooking.objects.create(
                     apartment_id=apartment,
                     user_id=user_id,
-                    amount_paid=((request.data['no_of_rooms'] - 1) * apartment.total_price) +  apartment.master_bedroom_total_price,
+                    amount_paid=(
+                        (no_of_rooms - 1) * single_apartment_price) + apartment.master_bedroom_total_price,
                     start_date=request.data['start_date'],
                     end_date=request.data['end_date'],
                     paid_for_master_bedroom=request.data['paid_for_master_bedroom'],
@@ -442,10 +450,29 @@ class BookApartmentView(generics.CreateAPIView):
                     cover_photo=apartment.image1
                 )
 
+                send_apartment_booking_email(
+                user_email, apartment.address, booking_start_date, booking_end_date)
+
+                trnx_details = models.Transaction.objects.create(
+                    user_id=user_id,
+                    amount=booking.amount_paid,
+                    payment_reference=reference,
+                    transaction_status="pending",
+                    description="Apartment Boooking",
+                    recipient="99Apartment",
+                    payment_method="PayStack",
+                )
+                return Response({"status": True, "message": "Apartment booked successfully", "data": {"reference": reference}}, status=status.HTTP_201_CREATED)
+
+
+            paystack_response = paystack_api.initialise_transaction(email=user_email, amount=no_of_rooms * single_apartment_price)
+            authorization_url = paystack_response['data']['authorization_url']
+            reference = paystack_response['data']['reference']
+
             booking = models.ApartmentBooking.objects.create(
                 apartment_id=apartment,
                 user_id=user_id,
-                amount_paid=request.data['no_of_rooms'] * apartment.total_price,
+                amount_paid=no_of_rooms * single_apartment_price,
                 start_date=request.data['start_date'],
                 end_date=request.data['end_date'],
                 paid_for_master_bedroom=request.data['paid_for_master_bedroom'],
@@ -464,7 +491,7 @@ class BookApartmentView(generics.CreateAPIView):
 
             trnx_details = models.Transaction.objects.create(
                 user_id=user_id,
-                amount=apartment.total_price,
+                amount=booking.amount_paid,
                 payment_reference=reference,
                 transaction_status="pending",
                 description="Apartment Boooking",
