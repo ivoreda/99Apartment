@@ -20,6 +20,9 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from .utils import PaystackAPI, UserService
 
+from dateutil.relativedelta import relativedelta
+
+
 user_service = UserService()
 paystack_api = PaystackAPI()
 
@@ -1173,6 +1176,50 @@ class TransactionHistoryView(generics.ListAPIView):
         queryset = models.Transaction.objects.filter(user_id=user_id)
         qs = self.serializer_class(queryset, many=True)
         return Response({"status": True, "message": "Data retrieved successfully", "data": qs.data}, status=status.HTTP_200_OK)
+
+
+class UserDashboardView(generics.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        try:
+            token = request.headers.get('Authorization')
+            clear_token = token[7:]
+            if token is None:
+                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception:
+            return Response({"status": False, "message": "Cannot get Auth token"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = user_service.get_user(token=clear_token)
+            user_id = user['data']['id']
+            verified_status = user['data']['isVerified']
+        except Exception:
+            return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        apartment_booking = models.ApartmentBooking.objects.filter(
+            user_id=user_id).latest('created_at')
+
+        rent = apartment_booking.amount_paid
+
+        date1 = apartment_booking.start_date
+        date2 = apartment_booking.end_date
+
+        difference_in_years = relativedelta(date2, date1).years
+
+        difference_in_months = relativedelta(date2, date1).months
+
+        # Calculate the total difference in months
+        total_difference_in_months = (
+            difference_in_years * 12) + difference_in_months
+
+        maintenance_queryset = models.Maintenance.objects.filter(user_id=user_id)
+        maintenance_qs = serializers.MaintenanceSerializer(
+            maintenance_queryset, many=True)
+
+        data = {"rent price": rent, "months_left": total_difference_in_months,
+                "rent_overdue": 0, "maintenance": len(maintenance_qs.data)}
+
+        return Response({"status": True, "message": "Data retrieved successfully", "data": data})
 
 
 class HostAnalyticsView(APIView):

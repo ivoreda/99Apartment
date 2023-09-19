@@ -4,8 +4,7 @@ from . import models
 
 class ApartmentSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
-
-    all_rooms = serializers.SerializerMethodField()
+    rooms = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Apartment
@@ -13,7 +12,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms',
                   'number_of_bathrooms', 'number_of_toilets', 'hasOccupants', 'isOccupied',
                   'price', 'owner_price', 'tax', 'tax_price', 'master_bedroom_price', 'master_bedroom_tax_price',
-                  'master_bedroom_total_price', 'rooms', 'all_rooms', 'apartment_fees', 'amenities', 'rules',
+                  'master_bedroom_total_price', 'rooms', 'apartment_fees', 'amenities', 'rules',
                   'cancellation_policy', 'point_of_interest', 'map_url', 'apartment_type',
                   'lease_type',  'rating', 'number_of_reviews', 'total_price',
                   'is_draft', 'images', 'has_master_bedroom',
@@ -32,13 +31,15 @@ class ApartmentSerializer(serializers.ModelSerializer):
                     images[field] = parts[1]
         return images
 
-    def get_all_rooms(self, obj):
-        master = [{'master_bedroom_price': obj.master_bedroom_price, 
-        'master_bedroom_tax_price': obj.master_bedroom_tax_price,
-         'master_bedroom_total_price': obj.master_bedroom_total_price}]
+    def get_rooms(self, obj):
+        master = [{'master_bedroom_price': obj.master_bedroom_price,
+                  'master_bedroom_tax_price': obj.master_bedroom_tax_price,
+                  'master_bedroom_total_price': obj.master_bedroom_total_price}]
+        print(obj.rooms + master)
 
-        all_rooms = obj.rooms + master
-        return all_rooms
+        rooms = obj.rooms + master
+
+        return rooms
 
 
 class HostApartmentSerializer(serializers.ModelSerializer):
