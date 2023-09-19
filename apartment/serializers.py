@@ -35,10 +35,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
         master = [{'master_bedroom_price': obj.master_bedroom_price,
                   'master_bedroom_tax_price': obj.master_bedroom_tax_price,
                   'master_bedroom_total_price': obj.master_bedroom_total_price}]
-        print(obj.rooms + master)
-
         rooms = obj.rooms + master
-
         return rooms
 
 
