@@ -6,7 +6,7 @@ baseUrl = "https://user-service-production-7c6d.up.railway.app"
 # baseUrl = "http://127.0.0.1:8001"
 
 # paystack_callback_url = "https://99apartment-production.up.railway.app/apartments/verify-booking/verified=true/"
-paystack_callback_url = "https://99apt-web.vercel.app/checkout/status/?verified=true/"
+paystack_callback_url = "https://99apt-web.vercel.app/checkout/status"
 
 class UserService:
 

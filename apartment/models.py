@@ -57,7 +57,7 @@ class Apartment(models.Model):
     master_bedroom_total_price = models.IntegerField(
         default=0)
 
-    other_rooms = models.JSONField(default=[])
+    rooms = models.JSONField(default=[])
 
     apartment_fees = models.JSONField(default=dict, blank=True, null=True)
     amenities = models.JSONField(
@@ -91,6 +91,10 @@ class Apartment(models.Model):
 
     total_price = models.IntegerField(
         default=0)
+    
+    single_room_total_price = models.IntegerField(
+        default=0)
+
     is_draft = models.BooleanField(default=False)
 
     # verification_status = models.CharField(
@@ -139,9 +143,11 @@ class Apartment(models.Model):
             self.hasOccupants = False
         total_apartment_fees = [int(value)
                                 for value in self.apartment_fees.values()]
-        self.tax_price = self.price * self.tax / 100
-        self.total_price = self.tax_price + \
-            self.price + sum(total_apartment_fees)
+        self.tax_price = round(self.price / self.number_of_rooms) * self.tax / 100
+        self.total_price = (self.tax_price * self.number_of_rooms) + self.price + (sum(total_apartment_fees) * self.number_of_rooms)
+
+        self.single_room_total_price = self.tax_price + round(self.price / self.number_of_rooms) + sum(total_apartment_fees)
+
         if self.has_master_bedroom:
             self.master_bedroom_price = (
                 (self.price/self.number_of_rooms) * self.master_bedroom_percentage) + (self.price/self.number_of_rooms)
@@ -149,12 +155,13 @@ class Apartment(models.Model):
             self.master_bedroom_total_price = self.master_bedroom_tax_price + \
                 self.master_bedroom_price + sum(total_apartment_fees)
 
-        self.other_rooms = []
+        self.rooms = []
 
         for i in range(1, self.number_of_rooms):
             room = {'id': i, 'price': self.price/self.number_of_rooms,
-                    'total_price': ((round(self.total_price/self.number_of_rooms) // 10 + 1) * 10)}
-            self.other_rooms.append(room)
+                    'total_price': self.single_room_total_price,
+                    'tax': self.tax_price, 'apartment_fees': self.apartment_fees}
+            self.rooms.append(room)
         super(Apartment, self).save(*args, **kwargs)
 
 

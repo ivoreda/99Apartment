@@ -55,8 +55,13 @@ host_urls = [
 
 guest_urls = [
     path('book/', views.BookApartmentView.as_view(), name='book'),
-    path('verify-booking/<str:reference>', views.VerifyApartmentBooking.as_view(),
-         name='verify-booking'),
+#     path('verify-booking/<str:reference>', views.VerifyApartmentBooking.as_view(),
+#          name='verify-booking'),
+
+    # Paystack webhook
+    path('webhook/paystack/', views.PaystackWebhookView.as_view(),
+         name='paystack_webhook'),
+
     path('checkout/<str:reference>/',
          views.CheckoutApartmentView.as_view(), name='checkout'),
     path('book-apartment-inpection/', views.BookApartmentInspectionView.as_view(),
