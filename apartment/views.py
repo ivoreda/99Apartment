@@ -217,21 +217,22 @@ class UnlistApartmentView(APIView):
 
 
 class EditApartmentView(APIView):
-    """View for listing apartment on platform"""
+    """View for editing an apartment listing"""
+
     serializer_class = serializers.ListApartmentSerializer
     authentication_classes = [TokenAuthentication]
     parser_classes = (MultiPartParser, FormParser)
 
     def patch(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
         try:
             token = request.headers.get('Authorization')
             clear_token = token[7:]
 
             if token is None:
-                return Response({"status": False, "message": "unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "Unauthenticated"}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception:
             return Response({"status": False, "message": "Cannot get Auth token"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             user = user_service.get_user(token=clear_token)
             verified_status = user['data']['isVerified']
@@ -242,35 +243,45 @@ class EditApartmentView(APIView):
                 " " + user['data']['last_name']
         except Exception:
             return Response({"status": False, "message": "User service error"}, status=status.HTTP_401_UNAUTHORIZED)
+
         if not verified_status:
-            return Response({"status": False,  "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"status": False, "message": "Your email is not verified. Please verify your email to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+
         if not isActiveHost:
-            return Response({"status": False,  "message": "Your profile is not yet verified as a host. Please wait for host verification to continue."}, status=status.HTTP_401_UNAUTHORIZED)
-        if profile_type == 'Host' and isActiveHost == True:
+            return Response({"status": False, "message": "Your profile is not yet verified as a host. Please wait for host verification to continue."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if profile_type == 'Host' and isActiveHost:
             apartment_id = self.kwargs.get('id')
             apartment = models.Apartment.objects.filter(
                 id=apartment_id).first()
+
             if not apartment:
-                return Response({"status": False, "message": "apartment not found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"status": False, "message": "Apartment not found"}, status=status.HTTP_404_NOT_FOUND)
+
             if int(apartment.owner_id) != user_id:
-                return Response({"status": False, "message": "You cannot edit this apartment. it is not yours"}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({"status": False, "message": "You cannot edit this apartment. It is not yours"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            serializer = self.serializer_class(
+                instance=apartment, data=request.data, partial=True)
 
             if serializer.is_valid():
-                apartment = serializer.save()
+                saved_apartment = serializer.save()
+
                 for i in range(1, 6):
                     image_field_name = f"image{i}"
                     image_file = request.data.get(image_field_name)
+
                     if image_file:
-                        upload_result = cloudinary.uploader.upload(
-                            image_file)
-                        setattr(apartment, image_field_name,
+                        upload_result = cloudinary.uploader.upload(image_file)
+                        setattr(saved_apartment, image_field_name,
                                 upload_result['secure_url'])
 
-                apartment.is_draft = False
-                apartment.status = 'Pending'
-                apartment.owner_id = user_id
-                apartment.owner_name = user_name
-                apartment.save()
+                saved_apartment.is_draft = False
+                saved_apartment.status = 'Pending'
+                saved_apartment.owner_id = user_id
+                saved_apartment.owner_name = user_name
+                saved_apartment.save()
+
                 return Response({"status": True, "message": "Apartment edited successfully"}, status=status.HTTP_200_OK)
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1212,7 +1223,8 @@ class UserDashboardView(generics.ListAPIView):
         total_difference_in_months = (
             difference_in_years * 12) + difference_in_months
 
-        maintenance_queryset = models.Maintenance.objects.filter(user_id=user_id)
+        maintenance_queryset = models.Maintenance.objects.filter(
+            user_id=user_id)
         maintenance_qs = serializers.MaintenanceSerializer(
             maintenance_queryset, many=True)
 
