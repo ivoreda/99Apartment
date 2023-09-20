@@ -518,39 +518,47 @@ class PaystackWebhookView(APIView):
         payload = request.data
         event_type = payload.get('event')
         payment_reference = payload['data']['reference']
-        amount = payload['data']['amount']
         if event_type == 'charge.success':
-            apartment_booking = models.ApartmentBooking.objects.filter(
-                payment_reference=payment_reference).first()
-            if amount == apartment_booking.amount_paid:
-                apartment_id = apartment_booking.apartment_id.id
-                if apartment_booking.isPaidFor == True:
-                    return Response({"status": False, "message": "This payment has been verified already."})
-                apartment_booking.isPaidFor = True
-                apartment_booking.save()
-                apartment = models.Apartment.objects.filter(
-                    id=apartment_id).first()
-                apartment.number_of_occupants += apartment_booking.no_of_rooms
-                if apartment_booking.paid_for_master_bedroom == True:
-                    apartment.is_master_bedroom_available = False
-                apartment.save()
-                trnx_details = models.Transaction.objects.filter(
-                    payment_reference=payment_reference).first()
-                trnx_details.transaction_status = "success"
-                trnx_details.save()
+            # trigger verify logic here with payment reference from the webhook
+            paystack_payment_verification_status = paystack_api.verify_transaction(reference=payment_reference)
+            if paystack_payment_verification_status['data']['status'] == 'success':
 
-                # email builder
-                start_date = apartment_booking.start_date
-                end_date = apartment_booking.end_date
-                user_email = apartment_booking.email
-                address = apartment_booking.apartment_id.address
-                apartment_name = apartment_booking.apartment_id.name
+                # check status from verify endpoint
+                apartment_booking = models.ApartmentBooking.objects.filter(
+                    payment_reference=payment_reference)
+                amount = paystack_payment_verification_status['data']['amount']
+                if int(amount) == int(apartment_booking.amount_paid):
+                    apartment_id = apartment_booking.apartment_id.id
+                    if apartment_booking.isPaidFor == True:
+                        return Response({"status": False, "message": "This payment has been verified already."})
+                    apartment_booking.isPaidFor = True
+                    apartment_booking.save()
 
-                send_apartment_payment_successful_email(
-                    user_email, address, apartment_name, start_date, end_date)
-                return Response({"status": True, "message": "Payment verified successfully"}, status=status.HTTP_200_OK)
+                    apartment = models.Apartment.objects.filter(
+                        id=apartment_id).first()
+                    apartment.number_of_occupants += apartment_booking.no_of_rooms
+                    if apartment_booking.paid_for_master_bedroom == True:
+                        apartment.is_master_bedroom_available = False
+                    apartment.save()
+                    trnx_details = models.Transaction.objects.filter(
+                        payment_reference=payment_reference).first()
+                    trnx_details.transaction_status = "success"
+                    trnx_details.save()
+
+                    # email builder
+                    start_date = apartment_booking.start_date
+                    end_date = apartment_booking.end_date
+                    user_email = apartment_booking.email
+                    address = apartment_booking.apartment_id.address
+                    apartment_name = apartment_booking.apartment_id.name
+
+                    send_apartment_payment_successful_email(
+                        user_email, address, apartment_name, start_date, end_date)
+                    return Response({"status": True, "message": "Payment verified successfully"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"status": False, "message": "amount not proper"}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({"status": False, "message": "amount not proper"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"status": False, "message": "Transaction verification failed"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"error": "Invalid event type"}, status=status.HTTP_400_BAD_REQUEST)
 
