@@ -1228,7 +1228,7 @@ class UserDashboardView(generics.ListAPIView):
         maintenance_qs = serializers.MaintenanceSerializer(
             maintenance_queryset, many=True)
 
-        data = {"rent price": rent, "months_left": total_difference_in_months,
+        data = {"rent_price": rent, "months_left": total_difference_in_months,
                 "rent_overdue": 0, "maintenance": len(maintenance_qs.data)}
 
         return Response({"status": True, "message": "Data retrieved successfully", "data": data})
