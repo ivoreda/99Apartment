@@ -524,10 +524,11 @@ class PaystackWebhookView(APIView):
             if paystack_payment_verification_status['data']['status'] == 'success':
 
                 # check status from verify endpoint
-                apartment_booking = models.ApartmentBooking.objects.filter(
+                apartment_booking = models.ApartmentBooking.objects.get(
                     payment_reference=payment_reference)
                 amount = paystack_payment_verification_status['data']['amount']
-                if int(amount) == int(apartment_booking.amount_paid):
+                new_amount = amount / 100
+                if int(new_amount) == int(apartment_booking.amount_paid):
                     apartment_id = apartment_booking.apartment_id.id
                     if apartment_booking.isPaidFor == True:
                         return Response({"status": False, "message": "This payment has been verified already."})
