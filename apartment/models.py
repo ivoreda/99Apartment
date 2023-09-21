@@ -37,6 +37,11 @@ class Apartment(models.Model):
 
     number_of_occupants = models.IntegerField(default=0)
     number_of_rooms = models.IntegerField(default=0)
+
+    accommodation_capacity = models.IntegerField(default=0)
+    availability = models.BooleanField(default=True)
+
+
     number_of_bathrooms = models.IntegerField(default=0)
     number_of_toilets = models.IntegerField(default=0)
     hasOccupants = models.BooleanField(default=False)
@@ -68,7 +73,7 @@ class Apartment(models.Model):
     cancellation_policy = models.JSONField(default=[], blank=True, null=True)
     point_of_interest = models.TextField(default='')
 
-    map_url = models.TextField(default="map url", blank=True, null=True)
+    map_url = models.TextField(default="", blank=True, null=True)
     apartment_type = models.CharField(default='', max_length=255)
     lease_type = models.CharField(default='Long Lease', choices=LEASE_TYPE)
     tax = models.FloatField(default=7.5)
@@ -166,7 +171,7 @@ class Apartment(models.Model):
         for i in range(1, self.number_of_rooms):
             room = {'id': i, 'price': round(self.price/self.number_of_rooms),
                     'total_price': round(self.single_room_total_price),
-                    'tax': round(self.tax_price), 'apartment_fees': self.apartment_fees}
+                    'tax': round(self.tax_price), 'apartment_fees': self.apartment_fees, 'available': self.availability}
             self.rooms.append(room)
         super(Apartment, self).save(*args, **kwargs)
 

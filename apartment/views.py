@@ -1228,16 +1228,22 @@ class UserDashboardView(generics.ListAPIView):
 
         difference_in_months = relativedelta(date2, date1).months
 
-        # Calculate the total difference in months
-        total_difference_in_months = (
-            difference_in_years * 12) + difference_in_months
+        total_difference_in_months = relativedelta(date2, date1).months
+
+        # Calculate the number of months that have passed from the start date
+        today = date.today()
+        months_passed = relativedelta(today, date1).months
+
+        # Calculate months left
+        months_left = max(total_difference_in_months - months_passed, 0)
+
 
         maintenance_queryset = models.Maintenance.objects.filter(
             user_id=user_id)
         maintenance_qs = serializers.MaintenanceSerializer(
             maintenance_queryset, many=True)
 
-        data = {"rent_price": rent, "months_left": total_difference_in_months,
+        data = {"rent_price": rent, "months_left": months_left,
                 "rent_overdue": 0, "maintenance": len(maintenance_qs.data)}
 
         return Response({"status": True, "message": "Data retrieved successfully", "data": data})
