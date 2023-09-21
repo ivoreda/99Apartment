@@ -9,7 +9,7 @@ class ApartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
         fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
-                  'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms',
+                  'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms', 'accommodation_capacity',
                   'number_of_bathrooms', 'number_of_toilets', 'hasOccupants', 'isOccupied',
                   'price', 'owner_price', 'tax', 'tax_price', 'master_bedroom_price', 'master_bedroom_tax_price',
                   'master_bedroom_total_price', 'rooms', 'apartment_fees', 'amenities', 'rules',
@@ -34,8 +34,11 @@ class ApartmentSerializer(serializers.ModelSerializer):
     def get_rooms(self, obj):
         master = [{'master_bedroom_price': obj.master_bedroom_price,
                   'master_bedroom_tax_price': obj.master_bedroom_tax_price,
-                  'master_bedroom_total_price': obj.master_bedroom_total_price}]
-        rooms = obj.rooms + master
+                   'master_bedroom_total_price': obj.master_bedroom_total_price}]
+
+        available_rooms = [room for room in obj.rooms if room['available']]
+
+        rooms = available_rooms + master
         return rooms
 
 
@@ -50,7 +53,7 @@ class HostApartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
         fields = ['id', 'owner_id', 'owner_name', 'name', 'status', 'description',
-                  'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms',
+                  'address', 'city', 'state', 'number_of_occupants', 'number_of_rooms', 'accommodation_capacity',
                   'number_of_bathrooms', 'number_of_toilets', 'hasOccupants', 'isOccupied',
                   'price', 'owner_price', 'tax', 'tax_price', 'total_price', 'master_bedroom_price',
                   'master_bedroom_tax_price', 'master_bedroom_total_price', 'rooms', 'apartment_fees',
@@ -79,11 +82,10 @@ class ListApartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
         fields = ['id', 'name', 'status', 'description', 'address', 'city', 'state', 'number_of_rooms',
-                  'number_of_bathrooms', 'number_of_toilets', 'owner_price', 'master_bedroom_price',
-                  'rooms', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
-                  'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
-                  'images', 'has_master_bedroom', 'is_master_bedroom_available', 'credit_renting',
-                  'shared_housing']
+                  'accommodation_capacity', 'number_of_bathrooms', 'number_of_toilets', 'owner_price',
+                  'master_bedroom_price', 'rooms', 'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
+                  'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft', 'images',
+                  'has_master_bedroom', 'is_master_bedroom_available', 'credit_renting', 'shared_housing']
 
     def get_images(self, obj):
         image_fields = ['image1', 'image2', 'image3', 'image4', 'image5']
@@ -134,7 +136,7 @@ class SaveApartmentDraftSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Apartment
         fields = ['name', 'status', 'description',
-                  'address', 'city', 'state', 'number_of_rooms',
+                  'address', 'city', 'state', 'number_of_rooms', 'accommodation_capacity',
                   'number_of_bathrooms', 'number_of_toilets', 'owner_price',
                   'apartment_fees', 'amenities', 'rules', 'cancellation_policy',
                   'point_of_interest', 'map_url', 'apartment_type', 'lease_type', 'is_draft',
