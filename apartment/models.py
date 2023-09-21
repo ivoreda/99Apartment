@@ -58,6 +58,7 @@ class Apartment(models.Model):
         default=0)
 
     rooms = models.JSONField(default=[])
+    accommodation_capacity = models.IntegerField(default=0)
 
     apartment_fees = models.JSONField(default=dict, blank=True, null=True)
     amenities = models.JSONField(
