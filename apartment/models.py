@@ -53,7 +53,7 @@ class Apartment(models.Model):
         default=0)
 
     # admin will edit this price
-    price = models.IntegerField(default=10)
+    price = models.IntegerField(default=100)
 
     master_bedroom_price = models.IntegerField(
         default=0)

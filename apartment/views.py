@@ -22,6 +22,8 @@ from .utils import PaystackAPI, UserService
 
 from dateutil.relativedelta import relativedelta
 
+from datetime import date
+
 
 user_service = UserService()
 paystack_api = PaystackAPI()
