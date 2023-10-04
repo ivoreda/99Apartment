@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 
+from decouple import config
+
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
@@ -27,14 +29,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-b!o+@z85j#kpcw1s_3hpm9955sio*$_h&o8mmfqn0^tiua@c9$"
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = ["https://99apartment-production.up.railway.app"]
-
 
 
 # Application definition
@@ -95,33 +96,15 @@ WSGI_APPLICATION = "apartments_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
-# Local postgres
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME':'99apartment_local',
-#         'USER':'postgres',
-#         'PASSWORD': 'postgres',
-#         'HOST': 'localhost',
-#         'PORT': 5432,
-#     }
-# }
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'PfxsvaH5W3hPayuBqpEo',
-        'HOST': 'containers-us-west-115.railway.app',
-        'PORT': 6374,
+        'NAME': config('NEW_DB_NAME'),
+        'USER': config('NEW_DB_USER'),
+        'PASSWORD': config('NEW_DB_PASSWORD'),
+        'HOST': config('NEW_DB_HOST'),
+        'PORT': config('NEW_DB_PORT', cast=int),
     }
 }
 
@@ -185,21 +168,22 @@ REST_FRAMEWORK = {
 }
 
 # Email config
-EMAIL_HOST = 'mail.the99keys.com'
-EMAIL_HOST_USER = 'ivor.e@the99keys.com'
-EMAIL_HOST_PASSWORD = '1Vor#ee!!'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
+
 cloudinary.config(
-    cloud_name="groundworks",
-    api_key="665148592363434",
-    api_secret="d00bD14YLSvFD6kaoeEUJ5rlz9U"
+    cloud_name=config('CLOUD_NAME'),
+    api_key=config('API_KEY'),
+    api_secret=config('API_SECRET')
 )
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-CLOUDINARY_STORAGE = {"CLOUD_NAME": "groundworks",
-                      "API_KEY": "665148592363434",
-                      "API_SECRET": "d00bD14YLSvFD6kaoeEUJ5rlz9U"}
+CLOUDINARY_STORAGE = {"CLOUD_NAME": config('CLOUD_NAME'),
+                      "API_KEY": config('API_KEY'),
+                      "API_SECRET": config('API_SECRET')}
