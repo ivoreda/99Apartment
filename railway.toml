@@ -1,0 +1,4 @@
+[statics]
+path = "static"
+
+url_prefix = "/static/"
