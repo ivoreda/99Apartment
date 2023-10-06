@@ -1,4 +1,4 @@
-# 99Apartments
+# backend
 
 
 
@@ -15,14 +15,14 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin https://gitlab.com/ivoredafej/99apartments.git
+git remote add origin https://gitlab.com/99apartments/shared-housing/backend.git
 git branch -M main
 git push -uf origin main
 ```
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](https://gitlab.com/ivoredafej/99apartments/-/settings/integrations)
+- [ ] [Set up project integrations](https://gitlab.com/99apartments/shared-housing/backend/-/settings/integrations)
 
 ## Collaborate with your team
 
