@@ -167,11 +167,11 @@ REST_FRAMEWORK = {
 }
 
 # Email config
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_HOST = config('NEW_EMAIL_HOST')
+EMAIL_HOST_USER = config('NEW_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('NEW_EMAIL_HOST_PASSWORD')
+EMAIL_PORT = config('NEW_EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('NEW_EMAIL_USE_TLS', cast=bool)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
