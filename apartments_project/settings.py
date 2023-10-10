@@ -32,7 +32,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+# DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = [config('CSRF_TRUSTED_ORIGINS')]
@@ -96,14 +97,28 @@ WSGI_APPLICATION = "apartments_project.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': config('PROD_DB_NAME'),
+#         'USER': config('PROD_DB_USER'),
+#         'PASSWORD': config('PROD_DB_PASSWORD'),
+#         'HOST': config('PROD_DB_HOST'),
+#         'PORT': config('PROD_DB_PORT', cast=int),
+#         'OPTIONS': {
+#             'sslmode': config('PROD_SSLMODE'),
+#         },
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config('NEW_DB_NAME'),
-        'USER': config('NEW_DB_USER'),
-        'PASSWORD': config('NEW_DB_PASSWORD'),
-        'HOST': config('NEW_DB_HOST'),
-        'PORT': config('NEW_DB_PORT', cast=int),
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'PfxsvaH5W3hPayuBqpEo',
+        'HOST': 'containers-us-west-115.railway.app',
+        'PORT': 6374,
     }
 }
 
@@ -142,7 +157,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'static/media'

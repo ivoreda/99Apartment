@@ -36,7 +36,8 @@ class ApartmentSerializer(serializers.ModelSerializer):
                   'master_bedroom_tax_price': obj.master_bedroom_tax_price,
                    'master_bedroom_total_price': obj.master_bedroom_total_price}]
 
-        available_rooms = [room for room in obj.rooms if room['available']]
+        # available_rooms = [room for room in obj.rooms if room['available']]
+        available_rooms = [room for room in obj.rooms]
 
         rooms = available_rooms + master
         return rooms
@@ -167,6 +168,7 @@ class ApartmentBookingSerializer(serializers.ModelSerializer):
         model = models.ApartmentBooking
         fields = ['apartment_id',
                   'paid_for_master_bedroom',
+                  'rooms_paid_for',
                   'start_date',
                   'no_of_rooms',
                   'end_date']
@@ -175,7 +177,8 @@ class ApartmentBookingSerializer(serializers.ModelSerializer):
 class CheckoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ApartmentBooking
-        fields = ['apartment_id', 'isPaidFor', 'paid_for_master_bedroom', 'amount_paid',
+        fields = ['apartment_id', 'isPaidFor', 'paid_for_master_bedroom',
+                  'rooms_paid_for', 'rent_price', 'amount_paid',
                   'user_id', 'payment_link', 'email', 'first_name',
                   'last_name', 'phone_number', 'start_date',
                   'end_date', 'payment_reference', 'cover_photo', 'no_of_rooms']
@@ -184,7 +187,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
 class VerifyApartmentBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ApartmentBooking
-        fields = ['payment_reference']
+        fields = ['payment_reference', 'apartment_id']
 
 
 class ResponseSerializer(serializers.Serializer):

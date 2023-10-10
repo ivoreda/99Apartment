@@ -24,6 +24,8 @@ from dateutil.relativedelta import relativedelta
 
 from datetime import date
 
+import pdb
+
 
 user_service = UserService()
 paystack_api = PaystackAPI()
@@ -446,14 +448,17 @@ class BookApartmentView(generics.CreateAPIView):
                 authorization_url = paystack_response['data']['authorization_url']
                 reference = paystack_response['data']['reference']
 
+
                 booking = models.ApartmentBooking.objects.create(
                     apartment_id=apartment,
                     user_id=user_id,
-                    amount_paid=(
+                    amount_paid=0,
+                    rent_price = (
                         (no_of_rooms - 1) * single_room_price) + apartment.master_bedroom_total_price,
                     start_date=request.data['start_date'],
                     end_date=request.data['end_date'],
                     paid_for_master_bedroom=request.data['paid_for_master_bedroom'],
+                    rooms_paid_for=request.data['rooms_paid_for'],
                     payment_reference=reference,
                     payment_link=authorization_url,
                     email=user_email,
@@ -464,12 +469,15 @@ class BookApartmentView(generics.CreateAPIView):
                     cover_photo=apartment.image1
                 )
 
+                # booking.rooms_paid_for.append(request.data['rooms_paid_for'])
+                # booking.save()
+
                 send_apartment_booking_email(
                     user_email, apartment.address, booking_start_date, booking_end_date)
 
                 trnx_details = models.Transaction.objects.create(
                     user_id=user_id,
-                    amount=booking.amount_paid,
+                    amount=booking.rent_price,
                     payment_reference=reference,
                     transaction_status="pending",
                     description="Apartment Boooking",
@@ -486,10 +494,12 @@ class BookApartmentView(generics.CreateAPIView):
             booking = models.ApartmentBooking.objects.create(
                 apartment_id=apartment,
                 user_id=user_id,
-                amount_paid=no_of_rooms * single_room_price,
+                amount_paid=0,
+                rent_price=no_of_rooms * single_room_price,
                 start_date=request.data['start_date'],
                 end_date=request.data['end_date'],
                 paid_for_master_bedroom=request.data['paid_for_master_bedroom'],
+                rooms_paid_for=request.data['rooms_paid_for'],
                 payment_reference=reference,
                 payment_link=authorization_url,
                 email=user_email,
@@ -505,7 +515,7 @@ class BookApartmentView(generics.CreateAPIView):
 
             trnx_details = models.Transaction.objects.create(
                 user_id=user_id,
-                amount=booking.amount_paid,
+                amount=booking.rent_price,
                 payment_reference=reference,
                 transaction_status="pending",
                 description="Apartment Boooking",
@@ -515,6 +525,40 @@ class BookApartmentView(generics.CreateAPIView):
             return Response({"status": True, "message": "Apartment booked successfully", "data": {"reference": reference}}, status=status.HTTP_201_CREATED)
 
 
+class TestChangeRoomAvailability(APIView):
+    serializer_class = serializers.VerifyApartmentBookingSerializer
+
+    def post(self, request, *args, **kwargs):
+        reference = request.data.get('payment_reference')
+        apartment_id = request.data.get('apartment_id')
+
+        booking = models.ApartmentBooking.objects.get(
+            payment_reference=reference)
+        apartment = models.Apartment.objects.get(id=apartment_id)
+
+        print("++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++")
+
+        # print(booking.rooms_paid_for)
+        for i in booking.rooms_paid_for:
+            # print(i)
+            for j in apartment.rooms:
+                if j['id'] == i:
+                    j['available'] = False
+                    # print(j)
+                    apartment.save(booking=booking)
+
+                # print(j['id'] == i)
+
+        print(apartment.rooms)
+
+        print("++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++")
+        # print(apartment)
+
+        return Response({"success"})
+
+
 class PaystackWebhookView(APIView):
     def post(self, request, *args, **kwargs):
         payload = request.data
@@ -522,7 +566,8 @@ class PaystackWebhookView(APIView):
         payment_reference = payload['data']['reference']
         if event_type == 'charge.success':
             # trigger verify logic here with payment reference from the webhook
-            paystack_payment_verification_status = paystack_api.verify_transaction(reference=payment_reference)
+            paystack_payment_verification_status = paystack_api.verify_transaction(
+                reference=payment_reference)
             if paystack_payment_verification_status['data']['status'] == 'success':
 
                 # check status from verify endpoint
@@ -535,11 +580,20 @@ class PaystackWebhookView(APIView):
                     if apartment_booking.isPaidFor == True:
                         return Response({"status": False, "message": "This payment has been verified already."})
                     apartment_booking.isPaidFor = True
+                    apartment_booking.amount_paid = new_amount
                     apartment_booking.save()
 
                     apartment = models.Apartment.objects.filter(
                         id=apartment_id).first()
                     apartment.number_of_occupants += apartment_booking.no_of_rooms
+
+                    # Change room availability here
+                    for i in booking.rooms_paid_for:
+                        for j in apartment.rooms:
+                            if j['id'] == i:
+                                j['available'] = False
+                                apartment.save(booking=booking)
+
                     if apartment_booking.paid_for_master_bedroom == True:
                         apartment.is_master_bedroom_available = False
                     apartment.save()
@@ -1221,6 +1275,7 @@ class UserDashboardView(generics.ListAPIView):
         apartment_booking = models.ApartmentBooking.objects.filter(
             user_id=user_id).latest('created_at')
 
+        # change this iin case of credit renting to be the actual rent price
         rent = apartment_booking.amount_paid
 
         date1 = apartment_booking.start_date
@@ -1239,13 +1294,12 @@ class UserDashboardView(generics.ListAPIView):
         # Calculate months left
         months_left = max(total_difference_in_months - months_passed, 0)
 
-
         maintenance_queryset = models.Maintenance.objects.filter(
             user_id=user_id)
         maintenance_qs = serializers.MaintenanceSerializer(
             maintenance_queryset, many=True)
 
-        data = {"rent_price": rent, "months_left": months_left,
+        data = {"total_rent_amount": apartment_booking.rent_price, "amount_paid": rent, "months_left": months_left,
                 "rent_overdue": 0, "maintenance": len(maintenance_qs.data)}
 
         return Response({"status": True, "message": "Data retrieved successfully", "data": data})

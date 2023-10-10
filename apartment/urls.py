@@ -101,6 +101,10 @@ guest_urls = [
     path('get-user-current-apartment/', views.GetUserCurrentApartmentView.as_view(),
          name='get-user-current-apartment'),
 
+
+    path('test-change-room-availability/',
+         views.TestChangeRoomAvailability.as_view(), name='test-something'),
+
 ]
 
 

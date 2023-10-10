@@ -41,7 +41,6 @@ class Apartment(models.Model):
     accommodation_capacity = models.IntegerField(default=0)
     availability = models.BooleanField(default=True)
 
-
     number_of_bathrooms = models.IntegerField(default=0)
     number_of_toilets = models.IntegerField(default=0)
     hasOccupants = models.BooleanField(default=False)
@@ -138,7 +137,7 @@ class Apartment(models.Model):
         # For this example, we'll just set the rate directly.
         self._occupancy_rate = value
 
-    def save(self, *args, **kwargs):
+    def save(self, booking=None, *args, **kwargs):
         if self.number_of_rooms == self.number_of_occupants:
             self.isOccupied = True
         else:
@@ -171,7 +170,12 @@ class Apartment(models.Model):
         for i in range(1, self.number_of_rooms):
             room = {'id': i, 'price': round(self.price/self.number_of_rooms),
                     'total_price': round(self.single_room_total_price),
-                    'tax': round(self.tax_price), 'apartment_fees': self.apartment_fees, 'available': self.availability}
+                    'tax': round(self.tax_price), 'apartment_fees': self.apartment_fees}
+
+            if kwargs.get('booking') and i in kwargs['booking'].rooms_paid_for:
+                room['available'] = False
+            else:
+                room['available'] = True
             self.rooms.append(room)
         super(Apartment, self).save(*args, **kwargs)
 
@@ -180,8 +184,12 @@ class ApartmentBooking(models.Model):
     apartment_id = models.ForeignKey(Apartment, on_delete=models.CASCADE)
     isPaidFor = models.BooleanField(default=False)
     paid_for_master_bedroom = models.BooleanField(default=False)
+
+    rooms_paid_for = models.JSONField(blank=True, null=True)
+
     amount_paid = models.IntegerField(
         default=0)
+    rent_price = models.IntegerField(default=0)
     user_id = models.CharField(max_length=255)
     payment_link = models.CharField(max_length=255, default='payment link')
     email = models.EmailField(default='email')
