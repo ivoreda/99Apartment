@@ -97,28 +97,17 @@ WSGI_APPLICATION = "apartments_project.wsgi.application"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': config('PROD_DB_NAME'),
-#         'USER': config('PROD_DB_USER'),
-#         'PASSWORD': config('PROD_DB_PASSWORD'),
-#         'HOST': config('PROD_DB_HOST'),
-#         'PORT': config('PROD_DB_PORT', cast=int),
-#         'OPTIONS': {
-#             'sslmode': config('PROD_SSLMODE'),
-#         },
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'PfxsvaH5W3hPayuBqpEo',
-        'HOST': 'containers-us-west-115.railway.app',
-        'PORT': 6374,
+        'NAME': config('PROD_DB_NAME'),
+        'USER': config('PROD_DB_USER'),
+        'PASSWORD': config('PROD_DB_PASSWORD'),
+        'HOST': config('PROD_DB_HOST'),
+        'PORT': config('PROD_DB_PORT', cast=int),
+        'OPTIONS': {
+            'sslmode': config('PROD_SSLMODE'),
+        },
     }
 }
 
