@@ -575,7 +575,7 @@ class PaystackWebhookView(APIView):
                     payment_reference=payment_reference)
                 amount = paystack_payment_verification_status['data']['amount']
                 new_amount = amount / 100
-                if int(new_amount) == int(apartment_booking.amount_paid):
+                if int(new_amount) == int(apartment_booking.rent_price):
                     apartment_id = apartment_booking.apartment_id.id
                     if apartment_booking.isPaidFor == True:
                         return Response({"status": False, "message": "This payment has been verified already."})
@@ -588,11 +588,11 @@ class PaystackWebhookView(APIView):
                     apartment.number_of_occupants += apartment_booking.no_of_rooms
 
                     # Change room availability here
-                    for i in booking.rooms_paid_for:
+                    for i in apartment_booking.rooms_paid_for:
                         for j in apartment.rooms:
                             if j['id'] == i:
                                 j['available'] = False
-                                apartment.save(booking=booking)
+                                apartment.save(booking=apartment_booking)
 
                     if apartment_booking.paid_for_master_bedroom == True:
                         apartment.is_master_bedroom_available = False
