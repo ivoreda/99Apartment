@@ -173,9 +173,9 @@ class Apartment(models.Model):
                     'tax': round(self.tax_price), 'apartment_fees': self.apartment_fees}
 
             if kwargs.get('booking') and i in kwargs['booking'].rooms_paid_for:
-                room['available'] = False
+                room[i]['available'] = False
             else:
-                room['available'] = True
+                room[i]['available'] = True
             self.rooms.append(room)
         super(Apartment, self).save(*args, **kwargs)
 
