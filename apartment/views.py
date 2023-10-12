@@ -545,10 +545,15 @@ class TestChangeRoomAvailability(APIView):
             for j in apartment.rooms:
                 if j['id'] == i:
                     j['available'] = False
-                    # print(j)
+                    print(j)
                     apartment.save(booking=booking)
+                    # apartment.save()
+                    # apartment.update_room_availability(booking=booking)  # Pass the booking object if available
+
+
 
                 # print(j['id'] == i)
+        print("################################")
 
         print(apartment.rooms)
 
