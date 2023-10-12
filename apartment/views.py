@@ -588,11 +588,11 @@ class PaystackWebhookView(APIView):
                     apartment.number_of_occupants += apartment_booking.no_of_rooms
 
                     # Change room availability here
-                    for i in apartment_booking.rooms_paid_for:
-                        for j in apartment.rooms:
-                            if j['id'] == i:
-                                j['available'] = False
-                                apartment.save(booking=apartment_booking)
+                    # for i in apartment_booking.rooms_paid_for:
+                    #     for j in apartment.rooms:
+                    #         if j['id'] == i:
+                    #             j['available'] = False
+                    #             apartment.save(booking=apartment_booking)
 
                     if apartment_booking.paid_for_master_bedroom == True:
                         apartment.is_master_bedroom_available = False
