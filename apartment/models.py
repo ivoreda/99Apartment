@@ -170,7 +170,7 @@ class Apartment(models.Model):
         for i in range(1, self.number_of_rooms):
             room = {'id': i, 'price': round(self.price/self.number_of_rooms),
                     'total_price': round(self.single_room_total_price),
-                    'tax': round(self.tax_price), 'apartment_fees': self.apartment_fees, 'available: True}
+                    'tax': round(self.tax_price), 'apartment_fees': self.apartment_fees, 'available': True}
             self.rooms.append(room)
         if booking:
             for i in booking.rooms_paid_for:
