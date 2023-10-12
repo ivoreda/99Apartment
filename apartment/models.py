@@ -137,7 +137,7 @@ class Apartment(models.Model):
         # For this example, we'll just set the rate directly.
         self._occupancy_rate = value
 
-    def save(self, booking, *args, **kwargs):
+    def save(self, booking=None, *args, **kwargs):
         if self.number_of_rooms == self.number_of_occupants:
             self.isOccupied = True
         else:
