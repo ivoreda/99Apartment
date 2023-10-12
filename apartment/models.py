@@ -137,7 +137,7 @@ class Apartment(models.Model):
         # For this example, we'll just set the rate directly.
         self._occupancy_rate = value
 
-    def save(self, booking=None, *args, **kwargs):
+    def save(self, *args, **kwargs):
         if self.number_of_rooms == self.number_of_occupants:
             self.isOccupied = True
         else:
@@ -172,6 +172,8 @@ class Apartment(models.Model):
                     'total_price': round(self.single_room_total_price),
                     'tax': round(self.tax_price), 'apartment_fees': self.apartment_fees, 'available': True}
             self.rooms.append(room)
+            
+        booking = kwargs.pop('booking', None)  # Remove 'booking' from kwargs
         if booking:
             for i in booking.rooms_paid_for:
                 for room in self.rooms:
