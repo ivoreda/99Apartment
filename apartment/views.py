@@ -93,6 +93,11 @@ class ListApartmentView(generics.CreateAPIView):
                     apartment.is_draft = False
                     if apartment.has_master_bedroom == True:
                         apartment.is_master_bedroom_available = True
+                    for i in range(1, apartment.number_of_rooms):
+                        room = {'id': i, 'price': apartment.single_room_price,
+                                'total_price': round(apartment.single_room_total_price),
+                                'tax': round(apartment.tax_price), 'apartment_fees': apartment.apartment_fees, 'available': True}
+                        apartment.rooms.append(room)
                     apartment.save()
                     return Response({"status": False,  "message": "Apartment added successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
                 else:
@@ -525,6 +530,37 @@ class BookApartmentView(generics.CreateAPIView):
             return Response({"status": True, "message": "Apartment booked successfully", "data": {"reference": reference}}, status=status.HTTP_201_CREATED)
 
 
+
+class TestApartmentSavingView(APIView):
+    serializer_class = serializers.VerifyApartmentBookingSerializer
+
+    def post(self, request, *args, **kwargs):
+        reference = request.data.get('payment_reference')
+        apartment_id = request.data.get('apartment_id')
+
+        booking = models.ApartmentBooking.objects.get(
+            payment_reference=reference)
+        apartment = models.Apartment.objects.get(id=apartment_id)
+
+        print("++++++++++++++++++++++++++")
+        print("++++++++++++++++++++++++++")
+
+        print(booking.rooms_paid_for)
+    
+
+        apartment.save()
+
+
+
+
+                # print(j['id'] == i)
+        print("################################")
+
+        print(apartment.rooms)
+
+        return Response({"success"})
+
+
 class TestChangeRoomAvailability(APIView):
     serializer_class = serializers.VerifyApartmentBookingSerializer
 
@@ -545,10 +581,11 @@ class TestChangeRoomAvailability(APIView):
             for j in apartment.rooms:
                 if j['id'] == i:
                     j['available'] = False
-                    # print(j)
-                    apartment.save(booking=booking)
+                    print(j)
+                    apartment.save()
 
                 # print(j['id'] == i)
+        print("################################")
 
         print(apartment.rooms)
 
@@ -592,7 +629,7 @@ class PaystackWebhookView(APIView):
                         for j in apartment.rooms:
                             if j['id'] == i:
                                 j['available'] = False
-                                apartment.save(booking=apartment_booking)
+                                apartment.save()
 
                     if apartment_booking.paid_for_master_bedroom == True:
                         apartment.is_master_bedroom_available = False
