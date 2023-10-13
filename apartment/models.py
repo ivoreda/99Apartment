@@ -174,12 +174,12 @@ class Apartment(models.Model):
             i['price'] = round(self.single_room_price)
             i['total_price'] = round(self.single_room_total_price)
 
-        booking = kwargs.pop('booking', None)
-        if booking:
-            for i in booking.rooms_paid_for:
-                for room in self.rooms:
-                    if room['id'] == i:
-                        room['available'] = False
+        # booking = kwargs.pop('booking', None)
+        # if booking:
+        #     for i in booking.rooms_paid_for:
+        #         for room in self.rooms:
+        #             if room['id'] == i:
+        #                 room['available'] = False
         super(Apartment, self).save(*args, **kwargs)
 
 
