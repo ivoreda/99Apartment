@@ -105,6 +105,9 @@ guest_urls = [
     path('test-change-room-availability/',
          views.TestChangeRoomAvailability.as_view(), name='test-something'),
 
+    path('test-apartment-saving/',
+         views.TestApartmentSavingView.as_view(), name='test-something'),
+
 ]
 
 

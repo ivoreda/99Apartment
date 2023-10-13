@@ -29,7 +29,7 @@ class Apartment(models.Model):
         max_length=255, help_text='Apartment owner name', default='owner name')
     name = models.CharField(max_length=255, help_text="Apartment name")
     status = models.CharField(
-        max_length=255, choices=APARTMENT_STATUS, default='Unverified')
+        max_length=255, choices=APARTMENT_STATUS, default='Unlisted')
     description = models.TextField(help_text="Enter apartment description")
     address = models.TextField(help_text="Enter apartment address")
     city = models.CharField(max_length=50, help_text="City")
@@ -99,6 +99,8 @@ class Apartment(models.Model):
 
     single_room_total_price = models.IntegerField(
         default=0)
+    single_room_price = models.IntegerField(
+        default=0)
 
     is_draft = models.BooleanField(default=False)
 
@@ -152,10 +154,13 @@ class Apartment(models.Model):
             self.price / self.number_of_rooms) * self.tax / 100
         self.total_price = (self.tax_price * self.number_of_rooms) + \
             self.price + (sum(total_apartment_fees) * self.number_of_rooms)
+        
+        self.single_room_price = round(self.price/self.number_of_rooms)
 
         self.single_room_total_price = self.tax_price + \
             round(self.price / self.number_of_rooms) + \
             sum(total_apartment_fees)
+        
 
         if self.has_master_bedroom:
             self.master_bedroom_price = (
@@ -164,17 +169,12 @@ class Apartment(models.Model):
                 self.master_bedroom_price * self.tax / 100)
             self.master_bedroom_total_price = self.master_bedroom_tax_price + \
                 self.master_bedroom_price + sum(total_apartment_fees)
+        for i in self.rooms:
+            i['tax'] = round(self.tax_price)
+            i['price'] = round(self.single_room_price)
+            i['total_price'] = round(self.single_room_total_price)
 
-        self.rooms = []
-
-        for i in range(1, self.number_of_rooms):
-            room = {'id': i, 'price': round(self.price/self.number_of_rooms),
-                    'total_price': round(self.single_room_total_price),
-                    'tax': round(self.tax_price), 'apartment_fees': self.apartment_fees, 'available': True}
-
-            self.rooms.append(room)
-
-        booking = kwargs.pop('booking', None)  # Remove 'booking' from kwargs
+        booking = kwargs.pop('booking', None)
         if booking:
             for i in booking.rooms_paid_for:
                 for room in self.rooms:
