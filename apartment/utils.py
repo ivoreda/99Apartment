@@ -22,8 +22,7 @@ class UserService:
 
 class PaystackAPI:
     def __init__(self) -> None:
-        # self.secret_key = config('PAYSTACK_SECRET_KEY')
-        self.secret_key = "sk_test_de60132ea93ebb81b5a505f3d2c23531525fc60e"
+        self.secret_key = config('PAYSTACK_SECRET_KEY')
         self.paystackUrl = 'https://api.paystack.co'
 
 
